@@ -1,0 +1,9 @@
+# Eclipse settings
+.metadata/
+.recommenders/
+.settings/
+.classpath
+.project
+bin/
+target/
+*.log
