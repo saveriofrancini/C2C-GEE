@@ -4,6 +4,12 @@
 .settings/
 .classpath
 .project
+bazel-bin/
+bazel-out/
+bazel-testlogs/
+bazel-C2C-GEE/
 bin/
 target/
+*.lock
+*~
 *.log
