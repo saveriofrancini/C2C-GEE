@@ -1,9 +1,8 @@
-/*
+package c2c.bottomup;
+
+/**
  * Class defining "Segments" to select specific sequences of "Points" over a "TimeLine"
  */
-
-package objects;
-
 public class Segment {
 	private int start;
 	private int finish;

@@ -1,12 +1,9 @@
-package functions;
+package c2c.bottomup;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-
-import objects.Changes;
-import objects.ChangesTimeLine;
 
 public class OutputFileWriter {
 

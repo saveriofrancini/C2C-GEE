@@ -1,18 +1,12 @@
-/* This segmentation algorithm consist in a modification of the bottom up algorithm
- * (https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.23.6570&rep=rep1&type=pdf)
- * proposed by Hermosilla et al. (2015)
- */
-
-package functions;
+package c2c.bottomup;
 
 import java.util.ArrayList;
 
-import objects.Changes;
-import objects.ChangesTimeLine;
-import objects.Points;
-import objects.Segment;
-import objects.TimeLine;
-
+/**
+ * This segmentation algorithm consist in a modification of the bottom up algorithm
+ * (https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.23.6570&rep=rep1&type=pdf)
+ * proposed by Hermosilla et al. (2015)
+ */
 public class Segmentator {
 
 	public static double calculateError(TimeLine timeline, int start, int finish) {

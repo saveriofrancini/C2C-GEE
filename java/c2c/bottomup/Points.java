@@ -1,9 +1,8 @@
-/*
+package c2c.bottomup;
+
+/**
  * Class defining "Points" over a time series. Points are defined by year and value
  */
-
-package objects;
-
 public class Points {
 
 	private double date = 0.0;

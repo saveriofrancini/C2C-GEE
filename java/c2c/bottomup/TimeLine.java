@@ -1,11 +1,10 @@
-/*
- * Class defining "TimeLine" (time series) of "Points".
- */
-
-package objects;
+package c2c.bottomup;
 
 import java.util.ArrayList;
 
+/**
+ * Class defining "TimeLine" (time series) of "Points".
+ */
 public class TimeLine {
 
 	private ArrayList<Points> timeLine;

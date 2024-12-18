@@ -1,9 +1,6 @@
-package functions;
+package c2c.bottomup;
 
 import com.google.earthengine.api.base.ArgsBase;
-
-import objects.ChangesTimeLine;
-import objects.TimeLine;
 
 public class Main {
 

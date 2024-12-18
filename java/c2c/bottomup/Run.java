@@ -1,24 +1,17 @@
-package runner;
+package c2c.bottomup;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import functions.InputFileReader;
-import functions.Main;
-import functions.Main.Args;
-import functions.OutputFileWriter;
-import objects.ChangesTimeLine;
-import objects.TimeLine;
-
 public class Run {
 
 	public static void main(String[] args) throws IOException {
 
-		Args arguments = new Args();
+                Main.Args arguments = new Main.Args();
 
-		String fileToBeRead = "./data/input.csv";
-		String outputFolder = "./data/output";
+		String fileToBeRead = "java/c2c/bottomup/testdata/input.csv";
+		String outputFolder = "java/c2c/bottomup/testdata/output";
 
 		InputFileReader inputFileReader;
 		Main main;

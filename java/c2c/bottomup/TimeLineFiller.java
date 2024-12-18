@@ -1,8 +1,6 @@
-package functions;
+package c2c.bottomup;
 
 import java.util.ArrayList;
-
-import objects.TimeLine;
 
 public class TimeLineFiller {
 

@@ -1,6 +1,4 @@
-package functions;
-
-import objects.TimeLine;
+package c2c.bottomup;
 
 public class NonZeroValuesCounter {
 	public static int countNonZeroValues(TimeLine T) {

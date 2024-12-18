@@ -1,11 +1,10 @@
-/*
+package c2c.bottomup;
+
+/**
  * Class defining "Changes".
  * "Changes" are particular kind of "Points" belonging to particular kind of "TimeLines" defined in the "ChangesTimeLine" class
  * "Changes" represents "Points" which values depend on values of subsequent and previous "Points".
  */
-
-package objects;
-
 public class Changes {
 
 	private double date;

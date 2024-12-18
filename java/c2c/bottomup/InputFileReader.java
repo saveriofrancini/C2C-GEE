@@ -1,11 +1,9 @@
-package functions;
+package c2c.bottomup;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import objects.TimeLine;
 
 public class InputFileReader {
 

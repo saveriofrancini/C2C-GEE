@@ -1,8 +1,4 @@
-package functions;
-
-import objects.Changes;
-import objects.ChangesTimeLine;
-import objects.TimeLine;
+package c2c.bottomup;
 
 public class UnsegmentableTimeLineManager {
 	public static ChangesTimeLine manageUnsegmentableTimeLine(TimeLine T, double startYear, double endYear) {
