@@ -1,169 +1,146 @@
 package c2c.bottomup;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- * This segmentation algorithm consist in a modification of the bottom up algorithm
+/* This segmentation algorithm consist in a modification of the bottom up algorithm
  * (https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.23.6570&rep=rep1&type=pdf)
  * proposed by Hermosilla et al. (2015)
  */
 public class Segmentator {
 
-	public static double calculateError(TimeLine timeline, int start, int finish) {
+  private static final double NODATA = Double.NaN;
 
-//		linearInterpolation
-		double firstValue = timeline.getPoint(start).getValue();
-		double lastValue = timeline.getPoint(finish).getValue();
-		double firstDate = timeline.getPoint(start).getDate();
-		double lastDate = timeline.getPoint(finish).getDate();
-		double timeWindow = lastDate - firstDate;
+  private static class Segment {
+    int start;
+    int finish;
 
-		double error = 0;
+    public Segment(int start, int finish) {
+      this.start = start;
+      this.finish = finish;
+    }
+  }
 
-		for (int i = start; i <= finish; i++) {
-			double xFraction = (timeline.getPoint(i).getDate() - firstDate) / timeWindow;
-			double interpolated = lerp(firstValue, lastValue, xFraction);
-			double diff = timeline.getPoint(i).getValue() - interpolated;
-			error += diff * diff;
-		}
+  public static List<Changes> segment(
+      DoubleArrayList dates, DoubleArrayList values, double maxError, int maxSegm) {
+    ArrayList<Segment> segments = new ArrayList<>();
+    ArrayList<Double> mergeCost = new ArrayList<>();
+    // initial segments
+    for (int i = 0; i < values.size() - 1; i++) {
+      segments.add(new Segment(i, i + 1));
+    }
+    // merging cost of initial segments
+    for (int i = 0; i < segments.size() - 1; i++) {
+      Segment left = segments.get(i);
+      Segment right = segments.get(i + 1);
+      mergeCost.add(calculateError(dates, values, left.start, right.finish));
+    }
+    // minimum merging cost
+    int index = argMin(mergeCost);
+    double min = mergeCost.get(index);
+    while (min < maxError | segments.size() > maxSegm) {
+      // merge the adjacent segments with the smaller cost
+      Segment segment = segments.get(index);
+      Segment segment2 = segments.get(index + 1);
+      segment.finish = segment2.finish;
+      // update segments
+      segments.remove(index + 1);
+      mergeCost.remove(index);
+      if (mergeCost.size() == 0) {
+        break;
+      }
+      if (index + 1 < segments.size()) {
+        Segment left = segments.get(index);
+        Segment right = segments.get(index + 1);
+        mergeCost.set(index, calculateError(dates, values, left.start, right.finish));
+      }
+      if (index - 1 >= 0) {
+        Segment left = segments.get(index - 1);
+        Segment right = segments.get(index);
+        mergeCost.set(index - 1, calculateError(dates, values, left.start, right.finish));
+      }
+      index = argMin(mergeCost);
+      min = mergeCost.get(index);
+    }
+    List<Changes> segmented = new ArrayList<>();
+    int leftIndex = 999;
+    int rightIndex = 999;
+    int centralIndex;
+    for (int i = 0; i < segments.size(); i++) {
+      centralIndex = segments.get(i).start;
+      if (i == 0) {
+        rightIndex = segments.get(i).finish;
+      } else {
+        leftIndex = segments.get(i - 1).start;
+        rightIndex = segments.get(i).finish;
+      }
+      Changes c = changeMetricsCalculator(dates, values, leftIndex, centralIndex, rightIndex);
+      segmented.add(c);
+    }
+    // add last change
+    centralIndex = segments.get(segments.size() - 1).finish;
+    leftIndex = segments.get(segments.size() - 1).start;
+    Changes c = changeMetricsCalculator(dates, values, leftIndex, centralIndex, rightIndex);
+    segmented.add(c);
+    return segmented;
+  }
 
-		return Math.sqrt(error / (finish - start));
-	}
+  public static double calculateError(
+      DoubleArrayList dates, DoubleArrayList values, int start, int finish) {
+    // linearInterpolation
+    double y1 = values.getDouble(start);
+    double y2 = values.getDouble(finish);
+    double x1 = dates.getDouble(start);
+    double x2 = dates.getDouble(finish);
+    double timeWindow = x2 - x1;
+    double error = 0;
+    for (int i = start; i <= finish; i++) {
+      double xFraction = (dates.getDouble(i) - x1) / timeWindow;
+      double interpolated = lerp(y1, y2, xFraction);
+      double diff = values.getDouble(i) - interpolated;
+      error += diff * diff;
+    }
+    return Math.sqrt(error / (finish - start));
+  }
 
-	public static Changes changeMetricsCalculator(TimeLine T, int leftPointIndex, int centralPointIndex,
-			int rightPointIndex) {
+  public static Changes changeMetricsCalculator(
+      DoubleArrayList dates, DoubleArrayList values, int preIndex, int currIndex, int postIndex) {
+    double currDate = dates.getDouble(currIndex);
+    double currValue = values.getDouble(currIndex);
+    Changes change;
+    if (currIndex == 0) {
+      double postMagnitude = values.getDouble(postIndex) - currValue;
+      double postDuration = dates.getDouble(postIndex) - currDate;
+      change = new Changes(currDate, currValue, NODATA, NODATA, postMagnitude, postDuration);
+    } else if (currIndex == values.size() - 1) {
+      double magnitude = currValue - values.getDouble(preIndex);
+      double duration = currDate - dates.getDouble(preIndex);
+      change = new Changes(currDate, currValue, magnitude, duration, NODATA, NODATA);
+    } else {
+      double magnitude = currValue - values.getDouble(preIndex);
+      double duration = currDate - dates.getDouble(preIndex);
+      double postMagnitude = values.getDouble(postIndex) - currValue;
+      double postDuration = dates.getDouble(postIndex) - currDate;
+      change = new Changes(currDate, currValue, magnitude, duration, postMagnitude, postDuration);
+    }
+    return change;
+  }
 
-		Points p = new Points(T.getPoint(centralPointIndex));
-		Changes changePoint;
-		double date = p.getDate();
-		double value = p.getValue();
-		double noData = Double.NaN;
+  public static double lerp(double y1, double y2, double x) {
+    return y1 * (1 - x) + y2 * x;
+  }
 
-		if (centralPointIndex == 0) {
-			Points pNext = new Points(T.getPoint(rightPointIndex));
-			double postMagnitude = pNext.getValue() - p.getValue();
-			double postDuration = pNext.getDate() - p.getDate();
-			changePoint = new Changes(date, value, noData, noData, postMagnitude, postDuration);
-		} else if (centralPointIndex == T.getSize() - 1) {
-			Points pPre = new Points(T.getPoint(leftPointIndex));
-			double magnitude = p.getValue() - pPre.getValue();
-			double duration = p.getDate() - pPre.getDate();
-			changePoint = new Changes(date, value, magnitude, duration, noData, noData);
-		} else {
-			Points pPre = new Points(T.getPoint(leftPointIndex));
-			Points pNext = new Points(T.getPoint(rightPointIndex));
-			double magnitude = p.getValue() - pPre.getValue();
-			double duration = p.getDate() - pPre.getDate();
-			double postMagnitude = pNext.getValue() - p.getValue();
-			double postDuration = pNext.getDate() - p.getDate();
-			changePoint = new Changes(date, value, magnitude, duration, postMagnitude, postDuration);
-		}
-
-		return changePoint;
-
-	}
-
-	public static double lerp(double y1, double y2, double x) {
-		return y1 * (1 - x) + y2 * x;
-	}
-
-	private static int minCost(ArrayList<Double> mergeCost) {
-		double min = mergeCost.get(0);
-		int pos = 0;
-		for (int i = 0; i < mergeCost.size(); i++) {
-			if (min > mergeCost.get(i)) {
-				min = mergeCost.get(i);
-				pos = i;
-			}
-		}
-		return pos;
-	}
-
-	public static ChangesTimeLine segmentationAlgorithm(TimeLine T, double maxError, int maxSegm) {
-
-//		We used ArrayList for segments and mergeCost because we have to set and remove values
-//		at specific positions which requires to define additional functions
-//		using arrays in the form of double[]
-		ArrayList<Segment> segments = new ArrayList<Segment>();
-		ArrayList<Double> mergeCost = new ArrayList<Double>();
-
-//		initial segments
-		for (int i = 0; i < T.getSize() - 1; i++) {
-			Segment segment = new Segment(i, i + 1);
-			segments.add(segment);
-		}
-
-//		merging cost of initial segments
-		for (int i = 0; i < segments.size() - 1; i++) {
-			Segment left = segments.get(i);
-			Segment right = segments.get(i + 1);
-			double cost = calculateError(T, left.getStart(), right.getFinish());
-			mergeCost.add(cost);
-		}
-
-//		minimum merging cost
-		int index = 0;
-		index = minCost(mergeCost);
-		double min = mergeCost.get(index);
-
-		while (min < maxError | segments.size() > maxSegm) {
-//			merge the adjacent segments with the smaller cost
-			Segment segment = segments.get(index);
-			Segment segment2 = segments.get(index + 1);
-			segment.setFinish(segment2.getFinish());
-//			update segments
-			segments.remove(index + 1);
-			mergeCost.remove(index);
-
-			if (index + 1 < segments.size()) {
-				Segment left = segments.get(index);
-				Segment right = segments.get(index + 1);
-				double cost = calculateError(T, left.getStart(), right.getFinish());
-				mergeCost.set(index, cost);
-			}
-			if (index - 1 >= 0) {
-				Segment left = segments.get(index - 1);
-				Segment right = segments.get(index);
-				double cost = calculateError(T, left.getStart(), right.getFinish());
-				mergeCost.set(index - 1, cost);
-			}
-			if (mergeCost.size() == 0) {
-				break;
-			}
-
-			index = minCost(mergeCost);
-			min = mergeCost.get(index);
-		}
-
-		ChangesTimeLine segmented = new ChangesTimeLine();
-
-		int leftPointIndex = 999;
-		int centralPointIndex = 999;
-		int rightPointIndex = 999;
-
-		for (int i = 0; i < segments.size(); i++) {
-
-			centralPointIndex = segments.get(i).getStart();
-
-			if (i == 0) {
-				rightPointIndex = segments.get(i).getFinish();
-			} else {
-				leftPointIndex = segments.get(i - 1).getStart();
-				rightPointIndex = segments.get(i).getFinish();
-			}
-
-			Changes c = changeMetricsCalculator(T, leftPointIndex, centralPointIndex, rightPointIndex);
-			segmented.addChange(c);
-
-		}
-
-//		add last change
-		centralPointIndex = segments.get(segments.size() - 1).getFinish();
-		leftPointIndex = segments.get(segments.size() - 1).getStart();
-		Changes c = changeMetricsCalculator(T, leftPointIndex, centralPointIndex, rightPointIndex);
-		segmented.addChange(c);
-
-		return segmented;
-	}
-
+  private static int argMin(ArrayList<Double> mergeCost) {
+    double min = mergeCost.get(0);
+    int pos = 0;
+    for (int i = 1; i < mergeCost.size(); i++) {
+      double value = mergeCost.get(i);
+      if (min > value) {
+        min = value;
+        pos = i;
+      }
+    }
+    return pos;
+  }
 }

@@ -1,1 +1,14 @@
+# C2C Bazel Module
+bazel_dep(name = "rules_jvm_external", version = "6.6")
 
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+
+# Used for the C2C algorithm.
+maven.install(
+    artifacts = [
+        "fastutil:fastutil:5.0.9",
+        "junit:junit:4.12",
+    ],
+)
+
+use_repo(maven, "maven")

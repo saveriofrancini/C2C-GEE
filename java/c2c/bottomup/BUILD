@@ -1,20 +1,14 @@
+load("@rules_jvm_external//:defs.bzl", "artifact")
+
+package(default_visibility = [
+    "//javatests/c2c/bottomup:__subpackages__",
+])
+
 java_library(
     name = "bottomup",
-    srcs = glob(
-        ["*.java"],
-        exclude = ["Run.java"],
-    ),
-    deps = ["//java/com/google/earthengine/api/base"],
-)
-
-java_binary(
-    name = "Run",
-    srcs = ["Run.java"],
-    data = glob([
-        "testdata/input.csv",
-        "testdata/output/*.csv",
-    ]),
+    srcs = glob(["*.java"]),
     deps = [
-        ":bottomup",
+        "//java/com/google/earthengine/api/base",
+        artifact("fastutil:fastutil"),
     ],
 )
