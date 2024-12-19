@@ -1,1 +1,2 @@
 build --java_language_version=21
+common --enable_bzlmod
