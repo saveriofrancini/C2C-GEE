@@ -1,6 +1,7 @@
 package c2c.bottomup;
 
 import static org.junit.Assert.assertEquals;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.io.FileInputStream;
 import java.util.List;
