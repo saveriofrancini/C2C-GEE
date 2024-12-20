@@ -32,7 +32,7 @@ public class C2cSolver {
   }
 
   public @Nullable List<Changes> c2cBottomUp(DoubleArrayList dates, DoubleArrayList values, Args args) {
-    if (values.stream().filter(v -> v != 0).count() < 3){
+    if (values.doubleStream().filter(v -> v != 0).count() < 3){
       return null;
     }
     // Preprocess as requested.

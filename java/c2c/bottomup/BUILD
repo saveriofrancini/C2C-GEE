@@ -9,7 +9,7 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         "//java/com/google/earthengine/api/base",
-        artifact("fastutil:fastutil"),
+        artifact("it.unimi.dsi:fastutil"),
         artifact("org.jspecify:jspecify"),
         artifact("com.google.guava:guava"),
     ],
