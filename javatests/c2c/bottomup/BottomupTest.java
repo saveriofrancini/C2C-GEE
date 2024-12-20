@@ -34,7 +34,7 @@ public class BottomupTest {
     C2cSolver solver = new C2cSolver();
     for (int i = 0; i < numberOfInputs; i++) {
       // The inputs have a plot ID in the first column that isn't used in the timeline.  Skip it.
-      DoubleArrayList timeline = inputs.getRow(i, /* skip */ 1);
+      DoubleArrayList timeline = inputs.getRow(i, /* skip= */ 1);
       List<Changes> result = solver.c2cBottomUp(dates, timeline, arguments);
       if (result != null) {
         verify(result, expected.get(i));
