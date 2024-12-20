@@ -1,5 +1,9 @@
 package c2c.bottomup;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.stream;
+
+import com.google.common.base.Splitter;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Read a resource file as a CSV into a List<DoubleArrayList>.
+ * Read a resource file as a CSV into a {@link List<DoubleArrayList>}
  * Data is stored as a list of columns with a list of string headers.
  *
  * NOTE: This class does not handle quoted strings and always assumes the separator is a comma.
@@ -28,7 +32,7 @@ class Csv {
    * Each "column" is actually a row, with the column header as the first item of the row.
    */
   public static Csv horizontal(InputStream stream) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
     try {
       List<String> headers = new ArrayList<>();
       List<DoubleArrayList> values = new ArrayList<>();
@@ -36,12 +40,12 @@ class Csv {
       while ((line = reader.readLine()) != null) {
         String[] parts = line.split(",");
         headers.add(parts[0]);
-        double[] doubles = Arrays.stream(parts).skip(1).mapToDouble(Double::parseDouble).toArray();
+        double[] doubles = stream(parts).skip(1).mapToDouble(Double::parseDouble).toArray();
         values.add(DoubleArrayList.wrap(doubles));
       }
       return new Csv(headers, values);
     } catch (IOException e) {
-      throw new RuntimeException(e.getMessage());
+      throw new IllegalStateException(e.getMessage());
     }
   }
 
@@ -49,18 +53,18 @@ class Csv {
    * Regular column-oriented file with a header line on top.
    */
   public static Csv vertical(InputStream stream) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
     try {
       List<String> headers = Arrays.asList(reader.readLine().split(","));
       List<DoubleArrayList> values = new ArrayList<>();
-      for (String s : headers) {
+      for (int i = 0; i < headers.size(); i++) {
         values.add(new DoubleArrayList());
       }
       String line;
       while ((line = reader.readLine()) != null) {
-        String[] parts = line.split(",");
-        for (int i = 0; i < parts.length; i++) {
-          values.get(i).add(Double.parseDouble(parts[i]));
+        List<String> parts = Splitter.on(',').splitToList(line);
+        for (int i = 0; i < parts.size(); i++) {
+          values.get(i).add(Double.parseDouble(parts.get(i)));
         }
       }
       return new Csv(headers, values);

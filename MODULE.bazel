@@ -8,6 +8,8 @@ maven.install(
     artifacts = [
         "fastutil:fastutil:5.0.9",
         "junit:junit:4.12",
+        "org.jspecify:jspecify:1.0.0",
+        "com.google.guava:guava:33.4.0-jre",
     ],
 )
 

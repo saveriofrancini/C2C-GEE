@@ -10,5 +10,7 @@ java_library(
     deps = [
         "//java/com/google/earthengine/api/base",
         artifact("fastutil:fastutil"),
+        artifact("org.jspecify:jspecify"),
+        artifact("com.google.guava:guava"),
     ],
 )
