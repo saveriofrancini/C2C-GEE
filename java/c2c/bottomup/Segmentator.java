@@ -4,13 +4,16 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.ArrayList;
 import java.util.List;
 
-/* This segmentation algorithm consist in a modification of the bottom up algorithm
+/**
+ * This segmentation algorithm consist in a modification of the bottom up algorithm
  * (https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.23.6570&rep=rep1&type=pdf)
  * proposed by Hermosilla et al. (2015)
  */
 public class Segmentator {
 
   private static final double NODATA = Double.NaN;
+
+  private Segmentator() {};
 
   private static class Segment {
     int start;
@@ -39,7 +42,7 @@ public class Segmentator {
     // minimum merging cost
     int index = argMin(mergeCost);
     double min = mergeCost.get(index);
-    while (min < maxError | segments.size() > maxSegm) {
+    while (min < maxError || segments.size() > maxSegm) {
       // merge the adjacent segments with the smaller cost
       Segment segment = segments.get(index);
       Segment segment2 = segments.get(index + 1);
@@ -47,7 +50,7 @@ public class Segmentator {
       // update segments
       segments.remove(index + 1);
       mergeCost.remove(index);
-      if (mergeCost.size() == 0) {
+      if (mergeCost.isEmpty()) {
         break;
       }
       if (index + 1 < segments.size()) {
@@ -131,7 +134,7 @@ public class Segmentator {
     return y1 * (1 - x) + y2 * x;
   }
 
-  private static int argMin(ArrayList<Double> mergeCost) {
+  private static int argMin(List<Double> mergeCost) {
     double min = mergeCost.get(0);
     int pos = 0;
     for (int i = 1; i < mergeCost.size(); i++) {
