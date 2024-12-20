@@ -2,12 +2,14 @@ package c2c.bottomup;
 
 import com.google.earthengine.api.base.ArgsBase;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
-import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /** Solver for the BottomUp Segmentation algorithm. */
 public class C2cSolver {
+
   public static final double NODATA = Double.NaN;
+
   public static class Args extends ArgsBase {
     @Doc(help = "Maximum error (RMSE) allowed to remove points and construct segments.")
     @Optional
@@ -29,8 +31,8 @@ public class C2cSolver {
     public double spikesTolerance = 0.85;
   }
 
-  public List<Changes> c2cBottomUp(DoubleArrayList dates, DoubleArrayList values, Args args) {
-    if (values.stream().filter(v -> v != 0).count() < 3){
+  public @Nullable List<Changes> c2cBottomUp(DoubleArrayList dates, DoubleArrayList values, Args args) {
+    if (values.doubleStream().filter(v -> v != 0).count() < 3){
       return null;
     }
     // Preprocess as requested.
@@ -100,7 +102,7 @@ public class C2cSolver {
     return -1;
   }
 
-  public static DoubleArrayList despikeTimeLine(DoubleArrayList values, double spikesTolerance) {
+  public static void despikeTimeLine(DoubleArrayList values, double spikesTolerance) {
     for (int i = 1; i < values.size() - 1; i++) {
       double left = values.getDouble(i - 1);
       double center = values.getDouble(i);
@@ -120,6 +122,5 @@ public class C2cSolver {
         values.set(i, fitted);
       }
     }
-    return values;
   }
 }

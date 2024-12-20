@@ -10,7 +10,7 @@ java_library(
     deps = [
         "//java/c2c/bottomup",
         artifact("junit:junit"),
-        artifact("fastutil:fastutil"),
+        artifact("it.unimi.dsi:fastutil"),
     ],
 )
 

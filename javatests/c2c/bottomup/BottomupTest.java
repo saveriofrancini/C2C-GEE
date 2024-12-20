@@ -42,7 +42,7 @@ public class BottomupTest {
       }
     }
     // There are 3 inputs that don't have enough points.
-    assertEquals(nullCount, 3);
+    assertEquals(3, nullCount);
   }
 
   /** Verify that the changes match the expected values. */
