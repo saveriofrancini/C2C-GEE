@@ -2,7 +2,7 @@ load("@rules_jvm_external//:defs.bzl", "artifact")
 
 java_library(
     name = "c2c_gee",
-    srcs = glob(["java/c2c/bottomup/*.java"]),
+    srcs = glob(["java/it/unibo/c2c/*.java"]),
     deps = [
         ":earthengine_external",
         artifact("it.unimi.dsi:fastutil"),
@@ -24,11 +24,11 @@ java_test(
     size = "medium",
     srcs = [
         "java/com/google/earthengine/api/base/ArgsBase.java",
-        "javatests/c2c/bottomup/BottomupTest.java",
+        "javatests/it/unibo/c2c/BottomupTest.java",
     ],
     resources = [
-        "javatests/c2c/bottomup/testdata/input.csv",
-        "javatests/c2c/bottomup/testdata/output.csv",
+        "javatests/it/unibo/c2c/testdata/input.csv",
+        "javatests/it/unibo/c2c/testdata/output.csv",
     ],
     deps = [
         ":c2c_gee",

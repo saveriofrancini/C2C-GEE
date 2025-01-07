@@ -1,4 +1,4 @@
-package c2c.bottomup;
+package it.unibo.c2c;
 
 /** Just a POD to record a change segment. */
 public class Changes {

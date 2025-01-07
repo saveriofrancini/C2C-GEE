@@ -1,4 +1,4 @@
-package c2c.bottomup;
+package it.unibo.c2c;
 
 import com.google.earthengine.api.base.ArgsBase;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;

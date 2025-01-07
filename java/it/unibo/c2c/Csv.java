@@ -1,4 +1,4 @@
-package c2c.bottomup;
+package it.unibo.c2c;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
