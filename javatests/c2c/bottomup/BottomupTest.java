@@ -3,7 +3,6 @@ package c2c.bottomup;
 import static org.junit.Assert.assertEquals;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
-import java.io.FileInputStream;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +18,9 @@ public class BottomupTest {
   public void testGoldens() throws Exception {
     // Read input file.  It has dates as column headers and each row is a full timeline.
     Csv inputs = Csv.vertical(getClass().getResourceAsStream(SAMPLES_FILE));
-    DoubleArrayList dates = DoubleArrayList.wrap(
-        inputs.headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
+    DoubleArrayList dates =
+        DoubleArrayList.wrap(
+            inputs.headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
     int numberOfInputs = inputs.values.get(0).size();
     // Read expected results file and split by plot ID.
     List<Csv> expected =
