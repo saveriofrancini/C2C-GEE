@@ -1,4 +1,4 @@
-package c2c.bottomup;
+package it.unibo.c2c;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.ArrayList;

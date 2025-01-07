@@ -1,4 +1,4 @@
-package c2c.bottomup;
+package it.unibo.c2c;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,8 +11,8 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class BottomupTest {
 
-  private static final String SAMPLES_FILE = "/c2c/bottomup/testdata/input.csv";
-  private static final String EXPECTED_FILE = "/c2c/bottomup/testdata/output.csv";
+  private static final String SAMPLES_FILE = "/it/unibo/c2c/testdata/input.csv";
+  private static final String EXPECTED_FILE = "/it/unibo/c2c/testdata/output.csv";
 
   @Test
   public void testGoldens() throws Exception {
