@@ -14,22 +14,24 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Read a resource file as a CSV into a {@link List<DoubleArrayList>}
- * Data is stored as a list of columns with a list of string headers.
+ * Read a resource file as a CSV into a {@link List<DoubleArrayList>} Data is stored as a list of
+ * columns with a list of string headers.
  *
- * NOTE: This class does not handle quoted strings and always assumes the separator is a comma.
+ * <p>NOTE: This class does not handle quoted strings and always assumes the separator is a comma.
  */
 class Csv {
+
   List<String> headers;
   List<DoubleArrayList> values;
+
   private Csv(List<String> headers, List<DoubleArrayList> values) {
     this.headers = headers;
     this.values = values;
   }
 
   /**
-   * A transposed csv.
-   * Each "column" is actually a row, with the column header as the first item of the row.
+   * A transposed csv. Each "column" is actually a row, with the column header as the first item of
+   * the row.
    */
   public static Csv horizontal(InputStream stream) {
     BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
@@ -49,9 +51,7 @@ class Csv {
     }
   }
 
-  /**
-   * Regular column-oriented file with a header line on top.
-   */
+  /** Regular column-oriented file with a header line on top. */
   public static Csv vertical(InputStream stream) {
     BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
     try {
@@ -88,8 +88,8 @@ class Csv {
   }
 
   /**
-   * Split the Csv based on the value of the 'id' column.
-   * Assumes the rows are sorted and grouped together.
+   * Split the Csv based on the value of the 'id' column. Assumes the rows are sorted and grouped
+   * together.
    */
   public List<Csv> groupByColumn(String id) {
     DoubleArrayList groupColumn = getColumn(id);

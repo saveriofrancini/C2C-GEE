@@ -14,25 +14,31 @@ public class C2cSolver {
     @Doc(help = "Maximum error (RMSE) allowed to remove points and construct segments.")
     @Optional
     public double maxError = 75;
+
     @Doc(help = "Maximum number of segments to be fitted on the time series.")
     @Optional
     public int maxSegments = 6;
+
     @Doc(help = "Year of the first image in the output image collection.")
     @Optional
     public int startYear = 1984;
+
     @Doc(help = "Year of the last image in the output image collection.")
     @Optional
     public int endYear = 2019;
+
     @Doc(help = "Whether to apply the pre-infill process.")
     @Optional
     public boolean infill = true;
+
     @Doc(help = "Tolerance of spikes in the time series. A value of 1 indicates no spike removal.")
     @Optional
     public double spikesTolerance = 0.85;
   }
 
-  public @Nullable List<Changes> c2cBottomUp(DoubleArrayList dates, DoubleArrayList values, Args args) {
-    if (values.doubleStream().filter(v -> v != 0).count() < 3){
+  public @Nullable List<Changes> c2cBottomUp(
+      DoubleArrayList dates, DoubleArrayList values, Args args) {
+    if (values.doubleStream().filter(v -> v != 0).count() < 3) {
       return null;
     }
     // Preprocess as requested.
@@ -88,7 +94,7 @@ public class C2cSolver {
     }
   }
 
-  /** Find the first non-zero from `start` in the direction of `dir`.  Returns -1 if none found. */
+  /** Find the first non-zero from `start` in the direction of `dir`. Returns -1 if none found. */
   static int findValid(DoubleArrayList list, int start, int dir) {
     if (start == -1) {
       return -1;
