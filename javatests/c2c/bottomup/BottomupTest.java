@@ -12,21 +12,19 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class BottomupTest {
 
-  private static final String SAMPLES_FILE = "javatests/c2c/bottomup/testdata/input.csv";
-  private static final String EXPECTED_FILE = "javatests/c2c/bottomup/testdata/output.csv";
+  private static final String SAMPLES_FILE = "/c2c/bottomup/testdata/input.csv";
+  private static final String EXPECTED_FILE = "/c2c/bottomup/testdata/output.csv";
 
   @Test
   public void testGoldens() throws Exception {
-    FileInputStream inputStream = new FileInputStream(SAMPLES_FILE);
-    FileInputStream outputStream = new FileInputStream(EXPECTED_FILE);
     // Read input file.  It has dates as column headers and each row is a full timeline.
-    Csv inputs = Csv.vertical(inputStream);
+    Csv inputs = Csv.vertical(getClass().getResourceAsStream(SAMPLES_FILE));
     DoubleArrayList dates = DoubleArrayList.wrap(
         inputs.headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
     int numberOfInputs = inputs.values.get(0).size();
     // Read expected results file and split by plot ID.
-    List<Csv> expected = Csv.vertical(outputStream)
-        .groupByColumn("id");
+    List<Csv> expected =
+        Csv.vertical(getClass().getResourceAsStream(EXPECTED_FILE)).groupByColumn("id");
     assertEquals(numberOfInputs, expected.size());
     // Apply the Main function on each timeLine.
     int nullCount = 0;
