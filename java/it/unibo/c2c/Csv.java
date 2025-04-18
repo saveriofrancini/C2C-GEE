@@ -1,121 +1,236 @@
 package it.unibo.c2c;
 
+import com.google.common.base.Splitter;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+
+import java.io.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static it.unibo.c2c.DoubleLists.doubleListOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 
-import com.google.common.base.Splitter;
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Read a resource file as a CSV into a {@link List<DoubleArrayList>} Data is stored as a list of
+ * Read a resource file as a CSV into a {@link List<DoubleList>} Data is stored as a list of
  * columns with a list of string headers.
  *
  * <p>NOTE: This class does not handle quoted strings and always assumes the separator is a comma.
  */
-class Csv {
+public record Csv(List<String> headers, List<DoubleList> values) {
 
-  List<String> headers;
-  List<DoubleArrayList> values;
+    private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols();
+    private static final DecimalFormat DECIMAL_FORMAT;
 
-  private Csv(List<String> headers, List<DoubleArrayList> values) {
-    this.headers = headers;
-    this.values = values;
-  }
-
-  /**
-   * A transposed csv. Each "column" is actually a row, with the column header as the first item of
-   * the row.
-   */
-  public static Csv horizontal(InputStream stream) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
-    try {
-      List<String> headers = new ArrayList<>();
-      List<DoubleArrayList> values = new ArrayList<>();
-      String line;
-      while ((line = reader.readLine()) != null) {
-        String[] parts = line.split(",");
-        headers.add(parts[0]);
-        double[] doubles = stream(parts).skip(1).mapToDouble(Double::parseDouble).toArray();
-        values.add(DoubleArrayList.wrap(doubles));
-      }
-      return new Csv(headers, values);
-    } catch (IOException e) {
-      throw new IllegalStateException(e.getMessage());
+    static {
+        DECIMAL_FORMAT_SYMBOLS.setDecimalSeparator('.');
+        DECIMAL_FORMAT = new DecimalFormat("#.###############", DECIMAL_FORMAT_SYMBOLS);
     }
-  }
 
-  /** Regular column-oriented file with a header line on top. */
-  public static Csv vertical(InputStream stream) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, UTF_8));
-    try {
-      List<String> headers = Arrays.asList(reader.readLine().split(","));
-      List<DoubleArrayList> values = new ArrayList<>();
-      for (int i = 0; i < headers.size(); i++) {
-        values.add(new DoubleArrayList());
-      }
-      String line;
-      while ((line = reader.readLine()) != null) {
-        List<String> parts = Splitter.on(',').splitToList(line);
-        for (int i = 0; i < parts.size(); i++) {
-          values.get(i).add(Double.parseDouble(parts.get(i)));
+    public Csv(List<String> headers, List<DoubleList> values) {
+        this.headers = headers.stream().map(String::trim).collect(Collectors.toCollection(ArrayList::new));
+        this.values = new ArrayList<>(values);
+        if (headers.isEmpty()) {
+            throw new IllegalArgumentException("headers cannot be empty");
         }
-      }
-      return new Csv(headers, values);
-    } catch (IOException e) {
-      throw new RuntimeException(e.getMessage());
+        if (values.size() != headers().size()) {
+            throw new IllegalArgumentException("The number of headers must match the number of values");
+        }
     }
-  }
 
-  /** Get a column by name. */
-  public DoubleArrayList getColumn(String name) {
-    return values.get(headers.indexOf(name));
-  }
-
-  /** Get one row of the CSV as a DoubleArrayList, skipping the first `skip` elements. */
-  public DoubleArrayList getRow(int row, int skip) {
-    DoubleArrayList result = new DoubleArrayList();
-    for (int col = skip; col < values.size(); col++) {
-      result.add(values.get(col).getDouble(row));
+    public static Csv empty(String... headers) {
+        return empty(Arrays.asList(headers));
     }
-    return result;
-  }
 
-  /**
-   * Split the Csv based on the value of the 'id' column. Assumes the rows are sorted and grouped
-   * together.
-   */
-  public List<Csv> groupByColumn(String id) {
-    DoubleArrayList groupColumn = getColumn(id);
-    List<Csv> result = new ArrayList<>();
-    int startRow = 0;
-    double lastGroup = groupColumn.getDouble(0);
-    for (int i = 0; i < groupColumn.size(); i++) {
-      if (groupColumn.getDouble(i) != lastGroup) {
-        result.add(subset(startRow, i - 1));
-        startRow = i;
-      }
-      lastGroup = groupColumn.getDouble(i);
+    public static Csv empty(List<String> headers) {
+        var values = headers.stream().map(it -> doubleListOf()).toList();
+        return new Csv(List.copyOf(headers), values);
     }
-    result.add(subset(startRow, groupColumn.size() - 1));
-    return result;
-  }
 
-  /** Extract a subset of rows as if it were another Csv */
-  Csv subset(int start, int end) {
-    List<DoubleArrayList> copies = new ArrayList<>();
-    int len = end - start + 1;
-    for (DoubleArrayList d : values) {
-      double[] copy = new double[len];
-      d.getElements(start, copy, 0, len);
-      copies.add(DoubleArrayList.wrap(copy));
+    /**
+     * A transposed csv. Each "column" is actually a row, with the column header as the first item of
+     * the row.
+     */
+    public static Csv horizontal(InputStream stream) {
+        try (var reader = new BufferedReader(new InputStreamReader(stream, UTF_8))) {
+            List<String> headers = new ArrayList<>();
+            List<DoubleList> values = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                headers.add(parts[0]);
+                double[] doubles = stream(parts).skip(1).mapToDouble(Double::parseDouble).toArray();
+                values.add(doubleListOf(doubles));
+            }
+            return new Csv(headers, values);
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
-    return new Csv(headers, copies);
-  }
+
+    /**
+     * Regular column-oriented file with a header line on top.
+     */
+    public static Csv vertical(InputStream stream) {
+        try (var reader = new BufferedReader(new InputStreamReader(stream, UTF_8))) {
+            String line = reader.readLine().trim();
+            while (line.startsWith("#")) {
+                line = reader.readLine().trim();
+            }
+            List<String> headers = Arrays.asList(line.split(","));
+            List<DoubleList> values = new ArrayList<>();
+            for (int i = 0; i < headers.size(); i++) {
+                values.add(doubleListOf());
+            }
+            int lineNumber = 1;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                List<String> parts = Splitter.on(',').splitToList(line);
+                for (int i = 0; i < parts.size(); i++) {
+                    try {
+                        values.get(i).add(Double.parseDouble(parts.get(i)));
+                    } catch (RuntimeException e) {
+                        throw new RuntimeException("Error parsing line %d (%s), column %d (%s)".formatted(lineNumber, line, i, parts.get(i)), e);
+                    }
+                }
+                lineNumber++;
+            }
+            return new Csv(headers, values);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public int getColumnsCount() {
+        return headers.size();
+    }
+
+    public int getRowsCount() {
+        return values.getFirst().size();
+    }
+
+    public DoubleList getHeadersAsDoubles() {
+        return doubleListOf(
+                headers.stream()
+                        .mapToDouble(it -> {
+                            try {
+                                return Double.parseDouble(it);
+                            } catch (NumberFormatException e) {
+                                return Double.NaN;
+                            }
+                        }).filter(it -> !Double.isNaN(it))
+        );
+    }
+
+    /**
+     * Get a column by name.
+     */
+    public DoubleList getColumn(String name) {
+        if (!headers.contains(name)) {
+            throw new IllegalArgumentException("Column %s not found in headers %s".formatted(name, headers));
+        }
+        return values.get(headers.indexOf(name));
+    }
+
+    /**
+     * Get one row of the CSV as a DoubleList, skipping the first `skip` elements.
+     */
+    public DoubleList getRow(int row, int skip) {
+        DoubleList result = doubleListOf();
+        for (int col = skip; col < values.size(); col++) {
+            result.add(values.get(col).getDouble(row));
+        }
+        return result;
+    }
+
+    /**
+     * Get one row of the CSV as a DoubleList, skipping the first element
+     */
+    public DoubleList getRow(int row) {
+        return getRow(row, 0);
+    }
+
+    /**
+     * Split the Csv based on the value of the column named 'name'.
+     * Preserves the partial order of the rows.
+     */
+    public Map<Double, Csv> groupByColumn(String id) {
+        DoubleList groups = doubleListOf(getColumn(id).doubleStream().distinct().sorted());
+        var result = new LinkedHashMap<Double, Csv>();
+        for (int i = 0; i < groups.size(); i++) {
+            result.put(groups.getDouble(i), empty(headers));
+        }
+        for (int i = 0; i < getRowsCount(); i++) {
+            DoubleList row = doubleListOf(getRow(i));
+            double group = row.getDouble(headers.indexOf(id));
+            result.get(group).addRow(row);
+        }
+        return result;
+    }
+
+    public void addRow(DoubleList row) {
+        if (row.size() != getColumnsCount()) {
+            throw new IllegalArgumentException("Row size (%s) does not match number of columns (%s)".formatted(row.size(), getColumnsCount()));
+        }
+        for (int i = 0; i < row.size(); i++) {
+            values.get(i).add(row.getDouble(i));
+        }
+    }
+
+    public void addRows(Csv other) {
+        for (int i = 0; i < other.getRowsCount(); i++) {
+            addRow(other.getRow(i));
+        }
+    }
+
+    /**
+     * Extract a subset of rows as if it were another Csv
+     */
+    public Csv subset(int start, int end) {
+        List<DoubleList> copies = new ArrayList<>();
+        int len = end - start + 1;
+        for (DoubleList d : values) {
+            double[] copy = new double[len];
+            d.getElements(start, copy, 0, len);
+            copies.add(doubleListOf(copy));
+        }
+        return new Csv(headers, copies);
+    }
+
+    public void writeTo(Writer writer) throws IOException {
+        BufferedWriter w = new BufferedWriter(writer);
+        w.write(String.join(", ", headers));
+        w.newLine();
+        w.flush();
+        for (int i = 0; i < getRowsCount(); i++) {
+            var row = getRow(i);
+            w.write(row.doubleStream().mapToObj(DECIMAL_FORMAT::format).collect(Collectors.joining(",")));
+            w.newLine();
+            w.flush();
+        }
+    }
+
+    public String toCsvString() {
+        try (StringWriter sw = new StringWriter()) {
+            writeTo(sw);
+            return sw.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void print() {
+        OutputStreamWriter writer = new OutputStreamWriter(System.out, UTF_8);
+        try {
+            writeTo(writer);
+            writer.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

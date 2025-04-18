@@ -28,28 +28,37 @@ import java.lang.annotation.Target;
  * or @Optional as appropriate, and should usually also be annotated with @Doc.
  */
 public abstract class ArgsBase {
-  /**
-   * An annotation that indicates that a parameter is optional. This is the default behavior, but
-   * the annotation is included for explicitness and completeness.
-   */
-  @Target(ElementType.FIELD)
-  @Retention(RetentionPolicy.RUNTIME)
-  protected @interface Optional {}
+    /**
+     * An annotation that indicates that a parameter is optional. This is the default behavior, but
+     * the annotation is included for explicitness and completeness.
+     */
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    protected @interface Optional {
+    }
 
-  /** An annotation that indicates that a parameter is required. */
-  @Target(ElementType.FIELD)
-  @Retention(RetentionPolicy.RUNTIME)
-  protected @interface Required {}
+    /**
+     * An annotation that indicates that a parameter is required.
+     */
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    protected @interface Required {
+    }
 
-  /** An annotation that indicates that a parameter is lazy. */
-  @Target(ElementType.FIELD)
-  @Retention(RetentionPolicy.RUNTIME)
-  protected @interface Lazy {}
+    /**
+     * An annotation that indicates that a parameter is lazy.
+     */
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    protected @interface Lazy {
+    }
 
-  /** An annotation that allows you to specify a description string for a parameter. */
-  @Target({ElementType.FIELD})
-  @Retention(RetentionPolicy.RUNTIME)
-  protected @interface Doc {
-    String help() default "";
-  }
+    /**
+     * An annotation that allows you to specify a description string for a parameter.
+     */
+    @Target({ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    protected @interface Doc {
+        String help() default "";
+    }
 }
