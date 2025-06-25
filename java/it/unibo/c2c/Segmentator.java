@@ -27,7 +27,11 @@ public class Segmentator {
   }
 
   public static List<Changes> segment(
-      DoubleArrayList dates, DoubleArrayList values, double maxError, int maxSegm, boolean includeRegrowth) {
+      DoubleArrayList dates,
+      DoubleArrayList values,
+      double maxError,
+      int maxSegm,
+      boolean includeRegrowth) {
     ArrayList<Segment> segments = new ArrayList<>();
     ArrayList<Double> mergeCost = new ArrayList<>();
     // initial segments
@@ -79,13 +83,17 @@ public class Segmentator {
         leftIndex = segments.get(i - 1).start;
         rightIndex = segments.get(i).finish;
       }
-      Changes c = changeMetricsCalculator(dates, values, leftIndex, centralIndex, rightIndex, includeRegrowth);
+      Changes c =
+          changeMetricsCalculator(
+              dates, values, leftIndex, centralIndex, rightIndex, includeRegrowth);
       segmented.add(c);
     }
     // add last change
     centralIndex = segments.get(segments.size() - 1).finish;
     leftIndex = segments.get(segments.size() - 1).start;
-    Changes c = changeMetricsCalculator(dates, values, leftIndex, centralIndex, rightIndex, includeRegrowth);
+    Changes c =
+        changeMetricsCalculator(
+            dates, values, leftIndex, centralIndex, rightIndex, includeRegrowth);
     segmented.add(c);
     return segmented;
   }
@@ -109,11 +117,17 @@ public class Segmentator {
   }
 
   /**
-   * For calculating regrowth we want to find when we are at .6, .8 and 1.0 
-   * of the previous breakpoint.
+   * For calculating regrowth we want to find when we are at .6, .8 and 1.0 of the previous
+   * breakpoint.
    */
   private static Changes.RegrowthMetric calculateRegrowthMetric(
-    DoubleArrayList dates, DoubleArrayList values, int preIndex, int currIndex, int postIndex, double currValue, double magnitude) {
+      DoubleArrayList dates,
+      DoubleArrayList values,
+      int preIndex,
+      int currIndex,
+      int postIndex,
+      double currValue,
+      double magnitude) {
     // This is the first breakpoint so no regrowth can be calculated as there is no target.
     if (Double.isNaN(magnitude)) {
       return Changes.EMPTY_REGROWTH;
@@ -149,18 +163,24 @@ public class Segmentator {
         break;
       }
     }
-    double recoveryIndicator = sampleCount == MIN_REGROWTH_SAMPLES 
-        ? indicatorSum / ((double) MIN_REGROWTH_SAMPLES) : Double.NaN;
+    double recoveryIndicator =
+        sampleCount == MIN_REGROWTH_SAMPLES
+            ? indicatorSum / ((double) MIN_REGROWTH_SAMPLES)
+            : Double.NaN;
     return new Changes.RegrowthMetric(
-      recoveryIndicator,
-      /* regrowth60= */ index60 == -1 ? Double.NaN : dates.getDouble(index60),
-      /* regrowth80= */ index80 == -1 ? Double.NaN : dates.getDouble(index80),
-      /* regrowth100= */ index100 == -1 ? Double.NaN : dates.getDouble(index100)
-    );
+        recoveryIndicator,
+        /* regrowth60= */ index60 == -1 ? Double.NaN : dates.getDouble(index60),
+        /* regrowth80= */ index80 == -1 ? Double.NaN : dates.getDouble(index80),
+        /* regrowth100= */ index100 == -1 ? Double.NaN : dates.getDouble(index100));
   }
 
   public static Changes changeMetricsCalculator(
-      DoubleArrayList dates, DoubleArrayList values, int preIndex, int currIndex, int postIndex, boolean includeRegrowth) {
+      DoubleArrayList dates,
+      DoubleArrayList values,
+      int preIndex,
+      int currIndex,
+      int postIndex,
+      boolean includeRegrowth) {
     final double currDate = dates.getDouble(currIndex);
     final double currValue = values.getDouble(currIndex);
     final double magnitude;
@@ -187,10 +207,13 @@ public class Segmentator {
       postDuration = dates.getDouble(postIndex) - currDate;
       preValue = values.getDouble(preIndex);
     }
-    var regrowth = includeRegrowth 
-      ? calculateRegrowthMetric(dates, values, preIndex, currIndex, postIndex, preValue, currValue)
-      : Changes.EMPTY_REGROWTH;
-    return new Changes(currDate, currValue, magnitude, duration, postMagnitude, postDuration, regrowth);
+    var regrowth =
+        includeRegrowth
+            ? calculateRegrowthMetric(
+                dates, values, preIndex, currIndex, postIndex, preValue, currValue)
+            : Changes.EMPTY_REGROWTH;
+    return new Changes(
+        currDate, currValue, magnitude, duration, postMagnitude, postDuration, regrowth);
   }
 
   public static double lerp(double y1, double y2, double x) {

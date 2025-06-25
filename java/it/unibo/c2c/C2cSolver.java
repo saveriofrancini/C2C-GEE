@@ -53,7 +53,8 @@ public class C2cSolver {
       despikeTimeLine(values, args.spikesTolerance);
     }
     // Start segmentation.
-    List<Changes> result = Segmentator.segment(dates, values, args.maxError, args.maxSegments, args.includeRegrowth);
+    List<Changes> result =
+        Segmentator.segment(dates, values, args.maxError, args.maxSegments, args.includeRegrowth);
     return result;
   }
 
