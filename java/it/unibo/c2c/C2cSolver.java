@@ -34,6 +34,10 @@ public class C2cSolver {
     @Doc(help = "Tolerance of spikes in the time series. A value of 1 indicates no spike removal.")
     @Optional
     public double spikesTolerance = 0.85;
+
+    @Doc(help = "Add regrowth information.")
+    @Optional
+    public boolean includeRegrowth = false;
   }
 
   public @Nullable List<Changes> c2cBottomUp(
@@ -41,7 +45,7 @@ public class C2cSolver {
     if (values.doubleStream().filter(v -> v != 0).count() < 3) {
       return null;
     }
-    // Preprocess as requested.
+    // Pre-process as requested.
     if (args.infill) {
       fillValues(values);
     }
@@ -49,7 +53,7 @@ public class C2cSolver {
       despikeTimeLine(values, args.spikesTolerance);
     }
     // Start segmentation.
-    List<Changes> result = Segmentator.segment(dates, values, args.maxError, args.maxSegments);
+    List<Changes> result = Segmentator.segment(dates, values, args.maxError, args.maxSegments, args.includeRegrowth);
     return result;
   }
 
