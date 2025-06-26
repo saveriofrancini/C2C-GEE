@@ -143,13 +143,14 @@ public class Segmentator {
       double value = values.getDouble(i);
       double interMagnitude = currValue - value;
       // Note: magnitude can be NaN, this will cause all the indices to remain NaN on output.
+      // with the execption of "indexRegrowth".
       double regrowthRatio = interMagnitude / magnitude;
       if (regrowthRatio >= 1.0 && index100 == -1) {
         index100 = i;
       }
       if (regrowthRatio >= 0.8 && index80 == -1) {
         index80 = i;
-      } 
+      }
       if (regrowthRatio >= 0.6 && index60 == -1) {
         index60 = i;
       }
@@ -163,12 +164,10 @@ public class Segmentator {
       }
     }
     double indexRegrowth =
-        sampleCount > 0
-            ? (indicatorSum / ((double) sampleCount)) - currValue
-            : Double.NaN;
+        sampleCount > 0 ? (indicatorSum / ((double) sampleCount)) - currValue : Double.NaN;
     return new Changes.RegrowthMetric(
         indexRegrowth,
-        indexRegrowth / magnitude,
+        /* recoveryIndicator= */ indexRegrowth / magnitude,
         /* regrowth60= */ index60 == -1 ? Double.NaN : dates.getDouble(index60),
         /* regrowth80= */ index80 == -1 ? Double.NaN : dates.getDouble(index80),
         /* regrowth100= */ index100 == -1 ? Double.NaN : dates.getDouble(index100));

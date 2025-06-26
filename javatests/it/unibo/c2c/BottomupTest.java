@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,8 +59,7 @@ public class BottomupTest {
       // assertEquals(c.postRate, expected.getColumn("postRate").getDouble(j), 1e-9);
       assertEquals(expected.getColumn("rate").getDouble(j), c.rate, 1e-9);
       if (includeRegrowth) {
-        assertEquals(
-            expected.getColumn("indexRegrowth").getDouble(j), c.indexRegrowth, 1e-9);
+        assertEquals(expected.getColumn("indexRegrowth").getDouble(j), c.indexRegrowth, 1e-9);
         assertEquals(
             expected.getColumn("recoveryIndicator").getDouble(j), c.recoveryIndicator, 1e-9);
         assertEquals(expected.getColumn("regrowth60").getDouble(j), c.regrowth60, 1e-9);
