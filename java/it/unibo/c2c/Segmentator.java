@@ -128,10 +128,6 @@ public class Segmentator {
       int postIndex,
       double currValue,
       double magnitude) {
-    // This is the first breakpoint so no regrowth can be calculated as there is no target.
-    if (Double.isNaN(magnitude)) {
-      return Changes.EMPTY_REGROWTH;
-    }
     // This is the last breakpoint so no regrowth can be calculated as there is no more trend.
     if (currIndex == values.size() - 1) {
       return Changes.EMPTY_REGROWTH;
@@ -141,17 +137,20 @@ public class Segmentator {
     int index60 = -1;
     int sampleCount = 0;
     double indicatorSum = 0;
-    for (int i = currIndex + 1; i < postIndex; ++i) {
+    // Note: regrowth metric extends beyond the current change window.
+    // TODO: Perhaps we should only calculate the regrowth metric for data within the change window.
+    for (int i = currIndex + 1; i < values.size(); ++i) {
       double value = values.getDouble(i);
       double interMagnitude = currValue - value;
+      // Note: magnitude can be NaN, this will cause all the indices to remain NaN on output.
       double regrowthRatio = interMagnitude / magnitude;
-      if (regrowthRatio >= 1.0) {
-        if (index100 == -1) {
-          index100 = i;
-        }
-      } else if (regrowthRatio >= 0.8 && index80 == -1) {
+      if (regrowthRatio >= 1.0 && index100 == -1) {
+        index100 = i;
+      }
+      if (regrowthRatio >= 0.8 && index80 == -1) {
         index80 = i;
-      } else if (regrowthRatio >= 0.6 && index60 == -1) {
+      } 
+      if (regrowthRatio >= 0.6 && index60 == -1) {
         index60 = i;
       }
       if (sampleCount < MIN_REGROWTH_SAMPLES) {
@@ -159,16 +158,17 @@ public class Segmentator {
         sampleCount++;
       }
       // End regrowth calculation if we reached 100% regrowth and have enough samples.
-      if ((index100 != -1) && (sampleCount == MIN_REGROWTH_SAMPLES)) {
+      if ((index100 != -1) && (sampleCount >= MIN_REGROWTH_SAMPLES)) {
         break;
       }
     }
-    double recoveryIndicator =
-        sampleCount == MIN_REGROWTH_SAMPLES
-            ? indicatorSum / ((double) MIN_REGROWTH_SAMPLES)
+    double indexRegrowth =
+        sampleCount > 0
+            ? (indicatorSum / ((double) sampleCount)) - currValue
             : Double.NaN;
     return new Changes.RegrowthMetric(
-        recoveryIndicator,
+        indexRegrowth,
+        indexRegrowth / magnitude,
         /* regrowth60= */ index60 == -1 ? Double.NaN : dates.getDouble(index60),
         /* regrowth80= */ index80 == -1 ? Double.NaN : dates.getDouble(index80),
         /* regrowth100= */ index100 == -1 ? Double.NaN : dates.getDouble(index100));
@@ -210,7 +210,7 @@ public class Segmentator {
     var regrowth =
         includeRegrowth
             ? calculateRegrowthMetric(
-                dates, values, preIndex, currIndex, postIndex, preValue, currValue)
+                dates, values, preIndex, currIndex, postIndex, currValue, magnitude)
             : Changes.EMPTY_REGROWTH;
     return new Changes(
         currDate, currValue, magnitude, duration, postMagnitude, postDuration, regrowth);

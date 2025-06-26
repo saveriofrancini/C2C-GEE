@@ -4,7 +4,7 @@ package it.unibo.c2c;
 public class Changes {
 
   public static final RegrowthMetric EMPTY_REGROWTH =
-      new RegrowthMetric(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      new RegrowthMetric(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
   double date;
   double value;
@@ -14,6 +14,7 @@ public class Changes {
   double postDuration;
   double rate;
   double postRate;
+  double indexRegrowth;
   double recoveryIndicator;
   double regrowth60;
   double regrowth80;
@@ -35,6 +36,7 @@ public class Changes {
     this.postDuration = postDuration;
     this.rate = this.magnitude / this.duration;
     this.postRate = this.postMagnitude / this.postDuration;
+    this.indexRegrowth = regrowthMetric.indexRegrowth;
     this.recoveryIndicator = regrowthMetric.recoveryIndicator;
     this.regrowth60 = regrowthMetric.regrowth60;
     this.regrowth80 = regrowthMetric.regrowth80;
@@ -42,5 +44,9 @@ public class Changes {
   }
 
   record RegrowthMetric(
-      double recoveryIndicator, double regrowth60, double regrowth80, double regrowth100) {}
+      double indexRegrowth,
+      double recoveryIndicator,
+      double regrowth60,
+      double regrowth80,
+      double regrowth100) {}
 }
