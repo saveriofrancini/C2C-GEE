@@ -13,19 +13,48 @@ public class BottomupTest {
 
   private static final String SAMPLES_FILE = "/it/unibo/c2c/testdata/input.csv";
   private static final String EXPECTED_FILE = "/it/unibo/c2c/testdata/output.csv";
+  private static final String EXPECTED_FILTERED = "/it/unibo/c2c/testdata/output-filtered.csv";
+  private static final String EXPECTED_REGROWTH = "/it/unibo/c2c/testdata/output-with-regrowth.csv";
 
   @Test
-  public void testGoldens() throws Exception {
+  public void c2c_defaultArgs() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+
+    runGoldensTest(SAMPLES_FILE, EXPECTED_FILE, args);
+  }
+
+  @Test
+  public void c2c_negativeMagnitudes() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+    args.negativeMagnitudeOnly = true;
+    // To regenerate the golden data:
+    // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
+    //   --negativeMagnitudeOnly > \
+    //   javatests/it/unibo/c2c/testdata/output-filtered.csv
+    runGoldensTest(SAMPLES_FILE, EXPECTED_FILTERED, args);
+  }
+
+  @Test
+  public void c2c_regrowth_noPostRate_negitiveMagnitudes() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+    args.includeRegrowth = true;
+    args.postMetrics = false;
+    args.negativeMagnitudeOnly = true;
+    // To regenerate the golden data:
+    // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
+    //   --includePostMetrics=false --includeRegrowth=true --negativeMagnitudeOnly > \
+    //   javatests/it/unibo/c2c/testdata/output-regrowth-negonly.csv
+    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, args);
+  }
+
+  private void runGoldensTest(String inputPath, String goldenPath, C2cSolver.Args args) {
     // Read input file.  It has dates as column headers and each row is a full timeline.
-    Csv inputs = Csv.vertical(getClass().getResourceAsStream(SAMPLES_FILE));
-    DoubleArrayList dates =
-        DoubleArrayList.wrap(
-            inputs.headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
+    Csv inputs = Csv.vertical(getClass().getResourceAsStream(inputPath));
+    DoubleArrayList dates = inputs.getDates();
     int numberOfInputs = inputs.values.get(0).size();
     // Read expected results file and split by plot ID.
     List<Csv> expected =
-        Csv.vertical(getClass().getResourceAsStream(EXPECTED_FILE)).groupByColumn("id");
-    assertEquals(numberOfInputs, expected.size());
+        Csv.vertical(getClass().getResourceAsStream(goldenPath)).groupByColumn("id");
     // Apply the Main function on each timeLine.
     int nullCount = 0;
     C2cSolver.Args arguments = new C2cSolver.Args();
@@ -35,7 +64,7 @@ public class BottomupTest {
       DoubleArrayList timeline = inputs.getRow(i, /* skip= */ 1);
       List<Changes> result = solver.c2cBottomUp(dates, timeline, arguments);
       if (result != null) {
-        verify(result, expected.get(i), /* includeRegrowth= */ false);
+        verify(result, expected.get(i), arguments);
       } else {
         nullCount++;
       }
@@ -45,27 +74,67 @@ public class BottomupTest {
   }
 
   /** Verify that the changes match the expected values. */
-  private void verify(List<Changes> actual, Csv expected, boolean includeRegrowth) {
+  private void verify(List<Changes> actual, Csv expected, C2cSolver.Args args) {
     List<DoubleArrayList> values = expected.values;
     assertEquals(actual.size(), values.get(0).size());
     for (int j = 0; j < actual.size(); j++) {
-      Changes c = actual.get(j);
-      assertEquals(expected.getColumn("year").getDouble(j), c.date, 1e-9);
-      assertEquals(expected.getColumn("index").getDouble(j), c.value, 1e-9);
-      assertEquals(expected.getColumn("duration").getDouble(j), c.duration, 1e-9);
-      assertEquals(expected.getColumn("magnitude").getDouble(j), c.magnitude, 1e-9);
-      // assertEquals(c.postMagnitude, expected.getColumn("postMagnitude").getDouble(j), 1e-9);
-      // assertEquals(c.postDuration, expected.getColumn("postDuration").getDouble(j), 1e-9);
-      // assertEquals(c.postRate, expected.getColumn("postRate").getDouble(j), 1e-9);
-      assertEquals(expected.getColumn("rate").getDouble(j), c.rate, 1e-9);
-      if (includeRegrowth) {
-        assertEquals(expected.getColumn("indexRegrowth").getDouble(j), c.indexRegrowth, 1e-9);
-        assertEquals(
-            expected.getColumn("recoveryIndicator").getDouble(j), c.recoveryIndicator, 1e-9);
-        assertEquals(expected.getColumn("regrowth60").getDouble(j), c.regrowth60, 1e-9);
-        assertEquals(expected.getColumn("regrowth80").getDouble(j), c.regrowth80, 1e-9);
-        assertEquals(expected.getColumn("regrowth100").getDouble(j), c.regrowth100, 1e-9);
+      Changes actualChanges = actual.get(j);
+      final Changes.RegrowthMetric regrowth;
+      if (args.includeRegrowth) {
+        regrowth =
+            new Changes.RegrowthMetric(
+                expected.getColumn("indexRegrowth").getDouble(j),
+                expected.getColumn("recoveryIndicator").getDouble(j),
+                expected.getColumn("regrowth60").getDouble(j),
+                expected.getColumn("regrowth80").getDouble(j),
+                expected.getColumn("regrowth100").getDouble(j));
+      } else {
+        regrowth = Changes.EMPTY_REGROWTH;
       }
+      Changes expectedChanges =
+          new Changes(
+              expected.getColumn("year").getDouble(j),
+              expected.getColumn("index").getDouble(j),
+              expected.getColumn("magnitude").getDouble(j),
+              expected.getColumn("duration").getDouble(j),
+              args.postMetrics ? expected.getColumn("postMagnitude").getDouble(j) : Double.NaN,
+              args.postMetrics ? expected.getColumn("postDuration").getDouble(j) : Double.NaN,
+              expected.getColumn("rate").getDouble(j),
+              args.postMetrics ? expected.getColumn("postRate").getDouble(j) : Double.NaN,
+              regrowth.indexRegrowth(),
+              regrowth.recoveryIndicator(),
+              regrowth.regrowth60(),
+              regrowth.regrowth80(),
+              regrowth.regrowth100());
+      try {
+        assertChangesEquals(expectedChanges, actualChanges);
+      } catch (AssertionError e) {
+        throw new AssertionError(
+            String.format(
+                "Change differed for id: %s, year: %s",
+                expected.getColumn("id").getDouble(j), expected.getColumn("year").getDouble(j)),
+            e);
+      }
+    }
+  }
+
+  private void assertChangesEquals(Changes expected, Changes actual) {
+    try {
+      assertEquals(expected.date(), actual.date(), 1e-9);
+      assertEquals(expected.value(), actual.value(), 1e-9);
+      assertEquals(expected.magnitude(), actual.magnitude(), 1e-9);
+      assertEquals(expected.duration(), actual.duration(), 1e-9);
+      assertEquals(expected.postMagnitude(), actual.postMagnitude(), 1e-9);
+      assertEquals(expected.postDuration(), actual.postDuration(), 1e-9);
+      assertEquals(expected.rate(), actual.rate(), 1e-9);
+      assertEquals(expected.postRate(), actual.postRate(), 1e-9);
+      assertEquals(expected.indexRegrowth(), actual.indexRegrowth(), 1e-9);
+      assertEquals(expected.recoveryIndicator(), actual.recoveryIndicator(), 1e-9);
+      assertEquals(expected.regrowth60(), actual.regrowth60(), 1e-9);
+      assertEquals(expected.regrowth80(), actual.regrowth80(), 1e-9);
+      assertEquals(expected.regrowth100(), actual.regrowth100(), 1e-9);
+    } catch (AssertionError e) {
+      throw new AssertionError(String.format("Expected:\n%s\nbut was:\n%s", expected, actual), e);
     }
   }
 }

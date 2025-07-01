@@ -35,9 +35,17 @@ public class C2cSolver {
     @Optional
     public double spikesTolerance = 0.85;
 
+    @Doc(help = "Add post metric information.")
+    @Optional
+    public boolean postMetrics = true;
+
     @Doc(help = "Add regrowth information.")
     @Optional
     public boolean includeRegrowth = false;
+
+    @Doc(help = "Whether filter out changes having a non-negative magnitude.")
+    @Optional
+    public boolean negativeMagnitudeOnly = false;
   }
 
   public @Nullable List<Changes> c2cBottomUp(
@@ -53,8 +61,7 @@ public class C2cSolver {
       despikeTimeLine(values, args.spikesTolerance);
     }
     // Start segmentation.
-    List<Changes> result =
-        Segmentator.segment(dates, values, args.maxError, args.maxSegments, args.includeRegrowth);
+    List<Changes> result = Segmentator.segment(dates, values, args);
     return result;
   }
 

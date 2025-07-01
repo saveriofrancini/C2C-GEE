@@ -107,6 +107,12 @@ class Csv {
     return result;
   }
 
+  // To be used on CSVs with "id,year1,year2,...,etc"
+  public DoubleArrayList getDates() {
+    return DoubleArrayList.wrap(
+        headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
+  }
+
   /** Extract a subset of rows as if it were another Csv */
   Csv subset(int start, int end) {
     List<DoubleArrayList> copies = new ArrayList<>();
