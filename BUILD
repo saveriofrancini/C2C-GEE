@@ -17,9 +17,9 @@ java_library(
 java_binary(
     name = "c2c",
     srcs = [
-    "java/it/unibo/c2c/CommandLineMain.java",
-    "java/com/google/earthengine/api/base/ArgsBase.java",
-  ],
+        "java/com/google/earthengine/api/base/ArgsBase.java",
+        "java/it/unibo/c2c/CommandLineMain.java",
+    ],
     main_class = "it.unibo.c2c.CommandLineMain",
     deps = [
         ":c2c_gee",
@@ -46,7 +46,7 @@ java_test(
         "javatests/it/unibo/c2c/testdata/input.csv",
         "javatests/it/unibo/c2c/testdata/output.csv",
         "javatests/it/unibo/c2c/testdata/output-filtered.csv",
-        "javatests/it/unibo/c2c/testdata/output-with-regrowth.csv",
+        "javatests/it/unibo/c2c/testdata/output-regrowth-negonly.csv",
     ],
     deps = [
         ":c2c_gee",

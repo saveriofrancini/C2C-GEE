@@ -1,6 +1,7 @@
 package it.unibo.c2c;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.List;
@@ -14,7 +15,12 @@ public class BottomupTest {
   private static final String SAMPLES_FILE = "/it/unibo/c2c/testdata/input.csv";
   private static final String EXPECTED_FILE = "/it/unibo/c2c/testdata/output.csv";
   private static final String EXPECTED_FILTERED = "/it/unibo/c2c/testdata/output-filtered.csv";
-  private static final String EXPECTED_REGROWTH = "/it/unibo/c2c/testdata/output-with-regrowth.csv";
+  private static final String EXPECTED_REGROWTH =
+      "/it/unibo/c2c/testdata/output-regrowth-negonly.csv";
+  private static final String EXPECTED_REGROWTH_RELATIVE =
+      "/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv";
+
+
 
   @Test
   public void c2c_defaultArgs() throws Exception {
@@ -57,15 +63,19 @@ public class BottomupTest {
         Csv.vertical(getClass().getResourceAsStream(goldenPath)).groupByColumn("id");
     // Apply the Main function on each timeLine.
     int nullCount = 0;
-    C2cSolver.Args arguments = new C2cSolver.Args();
     C2cSolver solver = new C2cSolver();
     for (int i = 0; i < numberOfInputs; i++) {
       // The inputs have a plot ID in the first column that isn't used in the timeline.  Skip it.
       DoubleArrayList timeline = inputs.getRow(i, /* skip= */ 1);
-      List<Changes> result = solver.c2cBottomUp(dates, timeline, arguments);
+      List<Changes> result = solver.c2cBottomUp(dates, timeline, args);
       if (result != null) {
-        verify(result, expected.get(i), arguments);
+        try {
+          verify(result, expected.get(i), args);
+        } catch (AssertionError e) {
+          throw new AssertionError(String.format("Failure for input %s", i), e);
+        }
       } else {
+        System.out.println("null line: " + i);
         nullCount++;
       }
     }
@@ -76,7 +86,19 @@ public class BottomupTest {
   /** Verify that the changes match the expected values. */
   private void verify(List<Changes> actual, Csv expected, C2cSolver.Args args) {
     List<DoubleArrayList> values = expected.values;
-    assertEquals(actual.size(), values.get(0).size());
+    // Empty only happens if we have negativeMagnitudeOnly=true, output should contain NaN dates.
+    if (actual.isEmpty()) {
+      assertTrue(
+          "Actual changes is empty, expected \"year\" to be NaN.",
+          Double.isNaN(expected.getColumn("year").getDouble(0)));
+      return;
+    }
+    assertEquals(
+        String.format(
+            "Mismatch in change count: Actual: %s, Expected: %s \n%s \n vs \n%s",
+            actual.size(), values.get(0).size(), actual, values.get(0)),
+        actual.size(),
+        values.get(0).size());
     for (int j = 0; j < actual.size(); j++) {
       Changes actualChanges = actual.get(j);
       final Changes.RegrowthMetric regrowth;

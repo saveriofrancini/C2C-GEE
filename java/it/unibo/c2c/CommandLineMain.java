@@ -97,38 +97,46 @@ public class CommandLineMain {
     for (int i = 0; i < allChanges.size(); ++i) {
       List<Changes> rowChanges = allChanges.get(i);
       if (rowChanges == null) {
-        // TODO: Log warning.
+        System.out.println(formatRow(i, Changes.EMPTY, args));
+        continue;
+      }
+      if (rowChanges.isEmpty()) {
+        System.out.println(formatRow(i, Changes.EMPTY, args));
         continue;
       }
       for (Changes c : rowChanges) {
-        ArrayList<String> outputStringElements = new ArrayList<>();
-        DoubleArrayList outputRow = new DoubleArrayList();
-        outputRow.add((double) i);
-        outputRow.add(c.date());
-        outputRow.add(c.value());
-        outputRow.add(c.magnitude());
-        outputRow.add(c.duration());
-        outputRow.add(c.rate());
-        if (args.postMetrics) {
-          outputRow.add(c.postMagnitude());
-          outputRow.add(c.postDuration());
-          outputRow.add(c.postRate());
-        }
-        if (args.includeRegrowth) {
-          outputRow.add(c.indexRegrowth());
-          outputRow.add(c.recoveryIndicator());
-          outputRow.add(c.regrowth60());
-          outputRow.add(c.regrowth80());
-          outputRow.add(c.regrowth100());
-        }
-        outputStringElements.addAll(
-            outputRow
-                .doubleStream()
-                .mapToObj(d -> DECIMAL_FORMAT.format(d))
-                .collect(Collectors.toList()));
-        System.out.println(String.join(",", outputStringElements));
+        System.out.println(formatRow(i, c, args));
       }
     }
+  }
+
+  private static String formatRow(int id, Changes c, C2cSolver.Args args) {
+    ArrayList<String> outputStringElements = new ArrayList<>();
+    DoubleArrayList outputRow = new DoubleArrayList();
+    outputRow.add((double) id);
+    outputRow.add(c.date());
+    outputRow.add(c.value());
+    outputRow.add(c.magnitude());
+    outputRow.add(c.duration());
+    outputRow.add(c.rate());
+    if (args.postMetrics) {
+      outputRow.add(c.postMagnitude());
+      outputRow.add(c.postDuration());
+      outputRow.add(c.postRate());
+    }
+    if (args.includeRegrowth) {
+      outputRow.add(c.indexRegrowth());
+      outputRow.add(c.recoveryIndicator());
+      outputRow.add(c.regrowth60());
+      outputRow.add(c.regrowth80());
+      outputRow.add(c.regrowth100());
+    }
+    return String.join(
+        ",",
+        outputRow
+            .doubleStream()
+            .mapToObj(d -> DECIMAL_FORMAT.format(d))
+            .collect(Collectors.toList()));
   }
 
   public static void main(String[] args) throws FileNotFoundException {

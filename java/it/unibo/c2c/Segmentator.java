@@ -125,7 +125,8 @@ public class Segmentator {
       int postIndex,
       double preValue,
       double currValue,
-      double magnitude) {
+      double magnitude,
+      C2cSolver.Args args) {
     // This is the last breakpoint so no regrowth can be calculated as there is no more trend.
     if (currIndex == values.size() - 1) {
       return Changes.EMPTY_REGROWTH;
@@ -136,8 +137,13 @@ public class Segmentator {
     if (!Double.isNaN(preValue)) {
       // Note: regrowth metric extends beyond the current change window.
       for (int i = currIndex + 1; i < values.size(); ++i) {
-        double value = values.getDouble(i);
-        double regrowthRatio = (currValue - value) / magnitude;
+        final double value = values.getDouble(i);
+        final double regrowthRatio;
+        if (args.useRelativeRegrowth) {
+          regrowthRatio = (currValue - value) / magnitude;
+        } else {
+          regrowthRatio = value / preValue;
+        }
         if (regrowthRatio >= 1.0 && index100 == -1) {
           index100 = i;
         }
@@ -209,7 +215,7 @@ public class Segmentator {
     var regrowth =
         args.includeRegrowth
             ? calculateRegrowthMetric(
-                dates, values, currIndex, postIndex, preValue, currValue, magnitude)
+                dates, values, currIndex, postIndex, preValue, currValue, magnitude, args)
             : Changes.EMPTY_REGROWTH;
     return Changes.create(
         currDate, currValue, magnitude, duration, postMagnitude, postDuration, regrowth);

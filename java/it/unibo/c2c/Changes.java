@@ -15,9 +15,11 @@ public record Changes(
     double regrowth60,
     double regrowth80,
     double regrowth100) {
-
   public static final RegrowthMetric EMPTY_REGROWTH =
       new RegrowthMetric(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+  public static final Changes EMPTY =
+      Changes.create(
+          Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, EMPTY_REGROWTH);
 
   public static Changes create(
       double date,

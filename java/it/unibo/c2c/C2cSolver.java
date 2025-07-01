@@ -43,6 +43,10 @@ public class C2cSolver {
     @Optional
     public boolean includeRegrowth = false;
 
+    @Doc(help = "Calculate regrowth by % of positive magnitude.")
+    @Optional
+    public boolean useRelativeRegrowth = false;
+
     @Doc(help = "Whether filter out changes having a non-negative magnitude.")
     @Optional
     public boolean negativeMagnitudeOnly = false;
