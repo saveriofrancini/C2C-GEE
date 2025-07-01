@@ -19,8 +19,8 @@ public class BottomupTest {
       "/it/unibo/c2c/testdata/output-regrowth-negonly.csv";
   private static final String EXPECTED_REGROWTH_RELATIVE =
       "/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv";
-
-
+  private static final String EXPECTED_REGROWTH_RELATIVE =
+      "/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv";
 
   @Test
   public void c2c_defaultArgs() throws Exception {
@@ -50,6 +50,20 @@ public class BottomupTest {
     // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
     //   --includePostMetrics=false --includeRegrowth=true --negativeMagnitudeOnly > \
     //   javatests/it/unibo/c2c/testdata/output-regrowth-negonly.csv
+    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, args);
+  }
+
+  @Test
+  public void c2c_regrowth_relative_noPostRate_negitiveMagnitudes() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+    args.includeRegrowth = true;
+    args.postMetrics = false;
+    args.negativeMagnitudeOnly = true;
+    // To regenerate the golden data:
+    // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
+    //   --includePostMetrics=false --includeRegrowth=true --negativeMagnitudeOnly
+    // --useRelativeRegrowth > \
+    //   javatests/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv
     runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, args);
   }
 
