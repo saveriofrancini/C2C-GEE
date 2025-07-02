@@ -8,8 +8,6 @@ import org.jspecify.annotations.Nullable;
 /** Solver for the BottomUp Segmentation algorithm. */
 public class C2cSolver {
 
-  public static final double NODATA = Double.NaN;
-
   public static class Args extends ArgsBase {
     @Doc(help = "Maximum error (RMSE) allowed to remove points and construct segments.")
     @Optional
@@ -69,7 +67,7 @@ public class C2cSolver {
     return result;
   }
 
-  public static void fillValues(DoubleArrayList values) {
+  private static void fillValues(DoubleArrayList values) {
     // Infill missing data
     for (int i = 0; i < values.size(); i++) {
       if (values.getDouble(i) != 0) {
@@ -111,7 +109,7 @@ public class C2cSolver {
   }
 
   /** Find the first non-zero from `start` in the direction of `dir`. Returns -1 if none found. */
-  static int findValid(DoubleArrayList list, int start, int dir) {
+  private static int findValid(DoubleArrayList list, int start, int dir) {
     if (start == -1) {
       return -1;
     }
@@ -124,7 +122,7 @@ public class C2cSolver {
     return -1;
   }
 
-  public static void despikeTimeLine(DoubleArrayList values, double spikesTolerance) {
+  private static void despikeTimeLine(DoubleArrayList values, double spikesTolerance) {
     for (int i = 1; i < values.size() - 1; i++) {
       double left = values.getDouble(i - 1);
       double center = values.getDouble(i);

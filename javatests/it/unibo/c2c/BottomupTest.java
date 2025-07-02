@@ -19,8 +19,6 @@ public class BottomupTest {
       "/it/unibo/c2c/testdata/output-regrowth-negonly.csv";
   private static final String EXPECTED_REGROWTH_RELATIVE =
       "/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv";
-  private static final String EXPECTED_REGROWTH_RELATIVE =
-      "/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv";
 
   @Test
   public void c2c_defaultArgs() throws Exception {
@@ -71,7 +69,7 @@ public class BottomupTest {
     // Read input file.  It has dates as column headers and each row is a full timeline.
     Csv inputs = Csv.vertical(getClass().getResourceAsStream(inputPath));
     DoubleArrayList dates = inputs.getDates();
-    int numberOfInputs = inputs.values.get(0).size();
+    int numberOfInputs = inputs.values().get(0).size();
     // Read expected results file and split by plot ID.
     List<Csv> expected =
         Csv.vertical(getClass().getResourceAsStream(goldenPath)).groupByColumn("id");
@@ -99,7 +97,7 @@ public class BottomupTest {
 
   /** Verify that the changes match the expected values. */
   private void verify(List<Changes> actual, Csv expected, C2cSolver.Args args) {
-    List<DoubleArrayList> values = expected.values;
+    List<DoubleArrayList> values = expected.values();
     // Empty only happens if we have negativeMagnitudeOnly=true, output should contain NaN dates.
     if (actual.isEmpty()) {
       assertTrue(

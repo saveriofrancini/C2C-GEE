@@ -149,9 +149,8 @@ public class CommandLineMain {
     Csv inputCsv = Csv.vertical(new FileInputStream(inputFile));
     DoubleArrayList dates = inputCsv.getDates();
     var solver = new C2cSolver();
-    // System.out.println("Running on file %s with args: %s%n", inputFile.getPath(), c2cArgs);
     ArrayList<List<Changes>> allChanges = new ArrayList<>();
-    for (int i = 0; i < inputCsv.values.get(0).size(); i++) {
+    for (int i = 0; i < inputCsv.values().get(0).size(); i++) {
       DoubleArrayList timeline = inputCsv.getRow(i, /* skip= */ 1);
       allChanges.add(solver.c2cBottomUp(dates, timeline, c2cArgs));
     }

@@ -9,24 +9,32 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Read a resource file as a CSV into a {@link List<DoubleArrayList>} Data is stored as a list of
- * columns with a list of string headers.
+ * Read a resource file as a CSV into a {@link List<DoubleList>} Data is stored as a list of columns
+ * with a list of string headers.
  *
  * <p>NOTE: This class does not handle quoted strings and always assumes the separator is a comma.
  */
-class Csv {
+public record Csv(List<String> headers, List<DoubleArrayList> values) {
 
-  List<String> headers;
-  List<DoubleArrayList> values;
+  private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols();
+  private static final DecimalFormat DECIMAL_FORMAT;
 
-  private Csv(List<String> headers, List<DoubleArrayList> values) {
-    this.headers = headers;
-    this.values = values;
+  static {
+    DECIMAL_FORMAT_SYMBOLS.setDecimalSeparator('.');
+    DECIMAL_FORMAT = new DecimalFormat("#.###############", DECIMAL_FORMAT_SYMBOLS);
+  }
+
+  // To be used on CSVs with "id,year1,year2,...,etc"
+  public DoubleArrayList getDates() {
+    return DoubleArrayList.wrap(
+        headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
   }
 
   /**
@@ -105,12 +113,6 @@ class Csv {
     }
     result.add(subset(startRow, groupColumn.size() - 1));
     return result;
-  }
-
-  // To be used on CSVs with "id,year1,year2,...,etc"
-  public DoubleArrayList getDates() {
-    return DoubleArrayList.wrap(
-        headers.stream().skip(1).mapToDouble(Double::parseDouble).toArray());
   }
 
   /** Extract a subset of rows as if it were another Csv */

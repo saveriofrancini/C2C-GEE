@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class Segmentator {
 
-  private static final double NODATA = Double.NaN;
   private static final int REGROWTH_INDICATOR_OFFSET = 5;
 
   private Segmentator() {}
@@ -96,7 +95,7 @@ public class Segmentator {
     return segmented;
   }
 
-  public static double calculateError(
+  private static double calculateError(
       DoubleArrayList dates, DoubleArrayList values, int start, int finish) {
     // linearInterpolation
     double y1 = values.getDouble(start);
@@ -221,7 +220,7 @@ public class Segmentator {
         currDate, currValue, magnitude, duration, postMagnitude, postDuration, regrowth);
   }
 
-  public static double lerp(double y1, double y2, double x) {
+  private static double lerp(double y1, double y2, double x) {
     return y1 * (1 - x) + y2 * x;
   }
 
