@@ -1,5 +1,4 @@
-# Running on file ./src/test/resources/it/unibo/c2c/input.csv with args: maxError=75.0, maxSegments=6, startYear=1984, endYear=2019, infill=true, spikesTolerance=0.85, revertBand=false, negativeMagnitudeOnly=false
-id, year, value, magnitude, duration, rate, postMagnitude, postDuration, postRate
+id,year,index,magnitude,duration,rate,postMagnitude,postDuration,postRate
 0,1984,498,NaN,NaN,NaN,22,10,2.2
 0,1994,520,22,10,2.2,-137,1,-137
 0,1995,383,-137,1,-137,212,1,212
@@ -2218,6 +2217,7 @@ id, year, value, magnitude, duration, rate, postMagnitude, postDuration, postRat
 426,2019,385,-13,5,-2.6,NaN,NaN,NaN
 427,1984,632,NaN,NaN,NaN,-33,35,-0.942857142857143
 427,2019,599,-33,35,-0.942857142857143,NaN,NaN,NaN
+428,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 429,1984,656,NaN,NaN,NaN,12,31,0.387096774193548
 429,2015,668,12,31,0.387096774193548,-964,1,-964
 429,2016,-296,-964,1,-964,492,1,492
@@ -4276,6 +4276,7 @@ id, year, value, magnitude, duration, rate, postMagnitude, postDuration, postRat
 822,2019,-52,-24,35,-0.685714285714286,NaN,NaN,NaN
 823,1984,626,NaN,NaN,NaN,-109,35,-3.114285714285714
 823,2019,517,-109,35,-3.114285714285714,NaN,NaN,NaN
+824,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 825,1984,149,NaN,NaN,NaN,-157,1,-157
 825,1985,-8,-157,1,-157,386,1,386
 825,1986,378,386,1,386,232,9,25.77777777777778
@@ -5130,6 +5131,7 @@ id, year, value, magnitude, duration, rate, postMagnitude, postDuration, postRat
 987,2019,326,-82,23,-3.565217391304348,NaN,NaN,NaN
 988,1984,195,NaN,NaN,NaN,16,35,0.457142857142857
 988,2019,211,16,35,0.457142857142857,NaN,NaN,NaN
+989,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 990,1984,230,NaN,NaN,NaN,210,4,52.5
 990,1988,440,210,4,52.5,-146,1,-146
 990,1989,294,-146,1,-146,202,6,33.666666666666664
