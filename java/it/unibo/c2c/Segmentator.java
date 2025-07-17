@@ -194,9 +194,10 @@ public class Segmentator {
       C2cSolver.Args args) {
     final double currDate = dates.getDouble(currIndex);
     final double currValue = values.getDouble(currIndex);
-    final double preValue = currIndex == 0 ? Double.NaN : values.getDouble(preIndex);
-    final double magnitude = currIndex == 0 ? Double.NaN : currValue - values.getDouble(preIndex);
-    final double duration = currIndex == 0 ? Double.NaN : currDate - dates.getDouble(preIndex);
+    boolean startOfSeries = currIndex == 0;
+    final double preValue = startOfSeries ? Double.NaN : values.getDouble(preIndex);
+    final double magnitude = startOfSeries ? Double.NaN : currValue - values.getDouble(preIndex);
+    final double duration = startOfSeries ? Double.NaN : currDate - dates.getDouble(preIndex);
     boolean endOfSeries = currIndex == values.size() - 1;
     boolean includePostMetrics = args.includePostMetrics && !endOfSeries;
     final double postMagnitude =
