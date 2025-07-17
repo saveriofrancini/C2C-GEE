@@ -35,7 +35,7 @@ public class C2cSolver {
 
     @Doc(help = "Add post metric information.")
     @Optional
-    public boolean postMetrics = true;
+    public boolean includePostMetrics = true;
 
     @Doc(help = "Add regrowth information.")
     @Optional
@@ -63,8 +63,7 @@ public class C2cSolver {
       despikeTimeLine(values, args.spikesTolerance);
     }
     // Start segmentation.
-    List<Changes> result = Segmentator.segment(dates, values, args);
-    return result;
+    return Segmentator.segment(dates, values, args);
   }
 
   private static void fillValues(DoubleArrayList values) {

@@ -3,6 +3,7 @@ package it.unibo.c2c;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This segmentation algorithm consist in a modification of the bottom up algorithm
@@ -121,7 +122,6 @@ public class Segmentator {
       DoubleArrayList dates,
       DoubleArrayList values,
       int currIndex,
-      int postIndex,
       double preValue,
       double currValue,
       double magnitude,
@@ -173,7 +173,19 @@ public class Segmentator {
         /* regrowth100= */ index100 == -1 ? Double.NaN : dates.getDouble(index100) - currDate);
   }
 
-  public static Changes changeMetricsCalculator(
+  /**
+   * Calculates the changes for a given series of dates and breakpoint values.
+   *
+   * <p>The contents of {@link Changes} depends on the args provided in the following ways:
+   *
+   * <ul>
+   *   <li>Post metrics are included if the arg `includePostMetrics` is true.
+   *   <li>Regrowth statistics are included if the arg `includeRegrowth` is true.
+   *   <li>Null may be returned if the magnitude in Changes would be zero or positive and
+   *       "negativeMagnitudeOnly" is true.
+   * </ul>
+   */
+  public static @Nullable Changes changeMetricsCalculator(
       DoubleArrayList dates,
       DoubleArrayList values,
       int preIndex,
@@ -182,30 +194,16 @@ public class Segmentator {
       C2cSolver.Args args) {
     final double currDate = dates.getDouble(currIndex);
     final double currValue = values.getDouble(currIndex);
-    final double magnitude;
-    final double duration;
-    final double postMagnitude;
-    final double postDuration;
-    final double preValue;
-    if (currIndex == 0) {
-      magnitude = Double.NaN;
-      duration = Double.NaN;
-      postMagnitude = values.getDouble(postIndex) - currValue;
-      postDuration = dates.getDouble(postIndex) - currDate;
-      preValue = Double.NaN;
-    } else if (currIndex == values.size() - 1 || args.postMetrics == false) {
-      magnitude = currValue - values.getDouble(preIndex);
-      duration = currDate - dates.getDouble(preIndex);
-      postMagnitude = Double.NaN;
-      postDuration = Double.NaN;
-      preValue = values.getDouble(preIndex);
-    } else {
-      magnitude = currValue - values.getDouble(preIndex);
-      duration = currDate - dates.getDouble(preIndex);
-      postMagnitude = values.getDouble(postIndex) - currValue;
-      postDuration = dates.getDouble(postIndex) - currDate;
-      preValue = values.getDouble(preIndex);
-    }
+    final double preValue = currIndex == 0 ? Double.NaN : values.getDouble(preIndex);
+    final double magnitude = currIndex == 0 ? Double.NaN : currValue - values.getDouble(preIndex);
+    final double duration = currIndex == 0 ? Double.NaN : currDate - dates.getDouble(preIndex);
+    boolean endOfSeries = currIndex == values.size() - 1;
+    boolean includePostMetrics = args.includePostMetrics && !endOfSeries;
+    final double postMagnitude =
+        includePostMetrics ? values.getDouble(postIndex) - currValue : Double.NaN;
+    final double postDuration =
+        includePostMetrics ? dates.getDouble(postIndex) - currDate : Double.NaN;
+
     if (args.negativeMagnitudeOnly) {
       if (!(magnitude < 0)) {
         return null;
@@ -214,7 +212,7 @@ public class Segmentator {
     var regrowth =
         args.includeRegrowth
             ? calculateRegrowthMetric(
-                dates, values, currIndex, postIndex, preValue, currValue, magnitude, args)
+                dates, values, currIndex, preValue, currValue, magnitude, args)
             : Changes.EMPTY_REGROWTH;
     return Changes.create(
         currDate, currValue, magnitude, duration, postMagnitude, postDuration, regrowth);

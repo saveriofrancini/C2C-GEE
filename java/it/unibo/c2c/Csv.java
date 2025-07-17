@@ -9,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,14 +20,6 @@ import java.util.List;
  * <p>NOTE: This class does not handle quoted strings and always assumes the separator is a comma.
  */
 public record Csv(List<String> headers, List<DoubleArrayList> values) {
-
-  private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols();
-  private static final DecimalFormat DECIMAL_FORMAT;
-
-  static {
-    DECIMAL_FORMAT_SYMBOLS.setDecimalSeparator('.');
-    DECIMAL_FORMAT = new DecimalFormat("#.###############", DECIMAL_FORMAT_SYMBOLS);
-  }
 
   // To be used on CSVs with "id,year1,year2,...,etc"
   public DoubleArrayList getDates() {
