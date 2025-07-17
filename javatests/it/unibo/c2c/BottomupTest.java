@@ -42,7 +42,7 @@ public class BottomupTest {
   public void c2c_regrowth_noPostRate_negitiveMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
     args.includeRegrowth = true;
-    args.postMetrics = false;
+    args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
     // To regenerate the golden data:
     // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
@@ -55,7 +55,7 @@ public class BottomupTest {
   public void c2c_regrowth_relative_noPostRate_negitiveMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
     args.includeRegrowth = true;
-    args.postMetrics = false;
+    args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
     // To regenerate the golden data:
     // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
@@ -131,10 +131,14 @@ public class BottomupTest {
               expected.getColumn("index").getDouble(j),
               expected.getColumn("magnitude").getDouble(j),
               expected.getColumn("duration").getDouble(j),
-              args.postMetrics ? expected.getColumn("postMagnitude").getDouble(j) : Double.NaN,
-              args.postMetrics ? expected.getColumn("postDuration").getDouble(j) : Double.NaN,
+              args.includePostMetrics
+                  ? expected.getColumn("postMagnitude").getDouble(j)
+                  : Double.NaN,
+              args.includePostMetrics
+                  ? expected.getColumn("postDuration").getDouble(j)
+                  : Double.NaN,
               expected.getColumn("rate").getDouble(j),
-              args.postMetrics ? expected.getColumn("postRate").getDouble(j) : Double.NaN,
+              args.includePostMetrics ? expected.getColumn("postRate").getDouble(j) : Double.NaN,
               regrowth.indexRegrowth(),
               regrowth.recoveryIndicator(),
               regrowth.regrowth60(),

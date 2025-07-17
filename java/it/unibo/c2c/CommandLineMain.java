@@ -1,5 +1,7 @@
 package it.unibo.c2c;
 
+import static java.util.stream.Collectors.joining;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CommandLineMain {
+
+  private CommandLineMain() {}
 
   private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols();
   private static final DecimalFormat DECIMAL_FORMAT;
@@ -41,7 +45,7 @@ public class CommandLineMain {
             throw new IllegalArgumentException("Unsupported type: " + type);
           }
           field.set(result, value);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | RuntimeException e) {
           throw new RuntimeException(
               "Error while parsing value `%s` as %s for property %s"
                   .formatted(value, field.getType().getSimpleName(), field.getName()),
@@ -80,7 +84,7 @@ public class CommandLineMain {
     headers.add("magnitude");
     headers.add("duration");
     headers.add("rate");
-    if (args.postMetrics) {
+    if (args.includePostMetrics) {
       headers.add("postMagnitude");
       headers.add("postDuration");
       headers.add("postRate");
@@ -93,7 +97,6 @@ public class CommandLineMain {
       headers.add("regrowth100");
     }
     System.out.println(String.join(",", headers));
-    int zeroPadSize = (int) Math.ceil(Math.log10(allChanges.size()));
     for (int i = 0; i < allChanges.size(); ++i) {
       List<Changes> rowChanges = allChanges.get(i);
       if (rowChanges == null) {
@@ -111,7 +114,6 @@ public class CommandLineMain {
   }
 
   private static String formatRow(int id, Changes c, C2cSolver.Args args) {
-    ArrayList<String> outputStringElements = new ArrayList<>();
     DoubleArrayList outputRow = new DoubleArrayList();
     outputRow.add((double) id);
     outputRow.add(c.date());
@@ -119,7 +121,7 @@ public class CommandLineMain {
     outputRow.add(c.magnitude());
     outputRow.add(c.duration());
     outputRow.add(c.rate());
-    if (args.postMetrics) {
+    if (args.includePostMetrics) {
       outputRow.add(c.postMagnitude());
       outputRow.add(c.postDuration());
       outputRow.add(c.postRate());
@@ -131,12 +133,10 @@ public class CommandLineMain {
       outputRow.add(c.regrowth80());
       outputRow.add(c.regrowth100());
     }
-    return String.join(
-        ",",
-        outputRow
+    return outputRow
             .doubleStream()
             .mapToObj(d -> DECIMAL_FORMAT.format(d))
-            .collect(Collectors.toList()));
+            .collect(joining(","));
   }
 
   public static void main(String[] args) throws FileNotFoundException {
