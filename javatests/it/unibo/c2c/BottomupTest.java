@@ -13,6 +13,7 @@ import org.junit.runners.JUnit4;
 public class BottomupTest {
 
   private static final String SAMPLES_FILE = "/it/unibo/c2c/testdata/input.csv";
+  private static final String SAMPLES_NBR_FILE = "/it/unibo/c2c/testdata/input-nbr.csv";
   private static final String EXPECTED_FILE = "/it/unibo/c2c/testdata/output.csv";
   private static final String EXPECTED_FILTERED = "/it/unibo/c2c/testdata/output-filtered.csv";
   private static final String EXPECTED_REGROWTH =
@@ -127,6 +128,7 @@ public class BottomupTest {
       }
       Changes expectedChanges =
           new Changes(
+              -1,  // don't compare date index.
               expected.getColumn("year").getDouble(j),
               expected.getColumn("index").getDouble(j),
               expected.getColumn("magnitude").getDouble(j),

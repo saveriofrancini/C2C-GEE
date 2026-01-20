@@ -44,6 +44,7 @@ java_test(
     ],
     resources = [
         "javatests/it/unibo/c2c/testdata/input.csv",
+        "javatests/it/unibo/c2c/testdata/input-nbr.csv",
         "javatests/it/unibo/c2c/testdata/output.csv",
         "javatests/it/unibo/c2c/testdata/output-filtered.csv",
         "javatests/it/unibo/c2c/testdata/output-regrowth-negonly.csv",

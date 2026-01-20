@@ -76,6 +76,15 @@ public class CommandLineMain {
     return result;
   }
 
+  private static void printInputRow(String firstCol, DoubleArrayList values) {
+    StringBuilder builder = new StringBuilder(firstCol);
+    for (int i = 0; i < values.size(); ++i) {
+      builder.append(',');
+      builder.append(values.get(i));
+    }
+    System.err.println(builder.toString());
+  }
+
   private static void printChangeCsv(List<List<Changes>> allChanges, C2cSolver.Args args) {
     ArrayList<String> headers = new ArrayList<>();
     headers.add("id");
@@ -150,9 +159,11 @@ public class CommandLineMain {
     DoubleArrayList dates = inputCsv.getDates();
     var solver = new C2cSolver();
     ArrayList<List<Changes>> allChanges = new ArrayList<>();
+    printInputRow("id", inputCsv.getDates());
     for (int i = 0; i < inputCsv.values().get(0).size(); i++) {
       DoubleArrayList timeline = inputCsv.getRow(i, /* skip= */ 1);
       allChanges.add(solver.c2cBottomUp(dates, timeline, c2cArgs));
+      printInputRow(String.valueOf(i), timeline);
     }
     printChangeCsv(allChanges, c2cArgs);
   }

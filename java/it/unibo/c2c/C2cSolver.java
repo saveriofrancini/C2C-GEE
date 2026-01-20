@@ -2,6 +2,7 @@ package it.unibo.c2c;
 
 import com.google.earthengine.api.base.ArgsBase;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 
@@ -41,6 +42,10 @@ public class C2cSolver {
     @Optional
     public boolean includeRegrowth = false;
 
+    @Doc(help = "Use changes to linearly interpolate regrowth metrics.")
+    @Optional
+    public boolean interpolateRegrowth = false;
+
     @Doc(help = "Calculate regrowth by % of positive magnitude.")
     @Optional
     public boolean useRelativeRegrowth = false;
@@ -62,8 +67,28 @@ public class C2cSolver {
     if (args.spikesTolerance < 1) {
       despikeTimeLine(values, args.spikesTolerance);
     }
+    
     // Start segmentation.
-    return Segmentator.segment(dates, values, args);
+    if (args.includeRegrowth && args.interpolateRegrowth) {
+      args.includeRegrowth = false;
+      List<Changes> changes = Segmentator.segment(dates, values, args);
+      interpolateValuesInplace(dates, values, changes);
+      args.includeRegrowth = true;
+      return interpolatedRegrowth(dates, values, changes, args);
+    } else {
+      return Segmentator.segment(dates, values, args);
+    }
+  }
+
+  List<Changes> interpolatedRegrowth(
+      DoubleArrayList dates, DoubleArrayList values, List<Changes> changes, C2cSolver.Args args) {
+    double prevChangeValue = Double.NaN;
+    ArrayList<Changes> changesWithRegrowth = new ArrayList<>();
+    for (Changes change : changes) {
+      changesWithRegrowth.add((Segmentator.addRegrowthToChange(dates, values, change, args)));
+      prevChangeValue = change.value();
+    }
+    return changesWithRegrowth;
   }
 
   private static void fillValues(DoubleArrayList values) {
@@ -142,4 +167,57 @@ public class C2cSolver {
       }
     }
   }
+
+  private static void interpValues(
+    DoubleArrayList dates,
+    DoubleArrayList values,
+    int startIndex,
+    int endIndex,
+    double x1,
+    double x2,
+    double y1,
+    double y2) {
+    for (int i = startIndex; i < endIndex; i++) {
+      double x = dates.get(i);
+      double interpValue = y1 + (y2 - y1) * (x - x1) / (x2 - x1);
+      values.set(i, interpValue);
+    }
+  }
+
+  /** Linearly interpolates the input timeline values using the changes breakpoints. */
+  private static void interpolateValuesInplace(
+    DoubleArrayList dates,
+    DoubleArrayList values,
+    List<Changes> changes) {
+
+    if (changes == null || changes.isEmpty()) {
+      return;
+    }
+    // Interpolation starts with the start of the series and ends at the start of the first breakpoint.
+    int endIndex = changes.get(0).dateIndex() - 1;
+    double x1 = dates.get(0);
+    double x2 = dates.get(endIndex);
+    double y1 = values.get(0);
+    double y2 = values.get(endIndex);
+    interpValues(dates, values, /* startIndex= */ 0, endIndex, x1, x2, y1, y2);
+
+    // Now interpolate between the rest of the breakpoints.
+    for (int changeIndex = 0; changeIndex < changes.size() - 1; ++changeIndex) {
+      Changes currChange = changes.get(changeIndex);
+      int nextChangeIndex = changes.get(changeIndex + 1).dateIndex();
+      x1 = currChange.date();
+      x2 = dates.get(nextChangeIndex - 1);
+      y1 = currChange.value();
+      y2 = values.get(nextChangeIndex - 1);
+      interpValues(dates, values, currChange.dateIndex(), nextChangeIndex, x1, x2, y1, y2);
+    }
+    // For the end of the series interpolate from the start of the last breakpoint until the end of the series.
+    Changes lastChange = changes.get(changes.size()-1);
+    x1 = lastChange.date();
+    x2 = dates.get(dates.size() - 1);
+    y1 = lastChange.value();
+    y2 = values.get(values.size() - 1);
+    interpValues(dates, values, lastChange.dateIndex() + 1, values.size() - 1, x1, x2, y1, y2);
+  }
 }
+
