@@ -67,7 +67,7 @@ public class C2cSolver {
     if (args.spikesTolerance < 1) {
       despikeTimeLine(values, args.spikesTolerance);
     }
-    
+
     // Start segmentation.
     if (args.includeRegrowth && args.interpolateRegrowth) {
       args.includeRegrowth = false;
@@ -169,14 +169,14 @@ public class C2cSolver {
   }
 
   private static void interpValues(
-    DoubleArrayList dates,
-    DoubleArrayList values,
-    int startIndex,
-    int endIndex,
-    double x1,
-    double x2,
-    double y1,
-    double y2) {
+      DoubleArrayList dates,
+      DoubleArrayList values,
+      int startIndex,
+      int endIndex,
+      double x1,
+      double x2,
+      double y1,
+      double y2) {
     for (int i = startIndex; i < endIndex; i++) {
       double x = dates.get(i);
       double interpValue = y1 + (y2 - y1) * (x - x1) / (x2 - x1);
@@ -186,14 +186,13 @@ public class C2cSolver {
 
   /** Linearly interpolates the input timeline values using the changes breakpoints. */
   private static void interpolateValuesInplace(
-    DoubleArrayList dates,
-    DoubleArrayList values,
-    List<Changes> changes) {
+      DoubleArrayList dates, DoubleArrayList values, List<Changes> changes) {
 
     if (changes == null || changes.isEmpty()) {
       return;
     }
-    // Interpolation starts with the start of the series and ends at the start of the first breakpoint.
+    // Interpolation starts with the start of the series and ends at the start of the first
+    // breakpoint.
     int endIndex = changes.get(0).dateIndex() - 1;
     double x1 = dates.get(0);
     double x2 = dates.get(endIndex);
@@ -211,8 +210,9 @@ public class C2cSolver {
       y2 = values.get(nextChangeIndex - 1);
       interpValues(dates, values, currChange.dateIndex(), nextChangeIndex, x1, x2, y1, y2);
     }
-    // For the end of the series interpolate from the start of the last breakpoint until the end of the series.
-    Changes lastChange = changes.get(changes.size()-1);
+    // For the end of the series interpolate from the start of the last breakpoint until the end of
+    // the series.
+    Changes lastChange = changes.get(changes.size() - 1);
     x1 = lastChange.date();
     x2 = dates.get(dates.size() - 1);
     y1 = lastChange.value();
@@ -220,4 +220,3 @@ public class C2cSolver {
     interpValues(dates, values, lastChange.dateIndex() + 1, values.size() - 1, x1, x2, y1, y2);
   }
 }
-

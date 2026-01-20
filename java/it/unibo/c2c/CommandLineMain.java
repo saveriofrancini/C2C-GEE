@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CommandLineMain {
 
@@ -142,10 +141,7 @@ public class CommandLineMain {
       outputRow.add(c.regrowth80());
       outputRow.add(c.regrowth100());
     }
-    return outputRow
-            .doubleStream()
-            .mapToObj(d -> DECIMAL_FORMAT.format(d))
-            .collect(joining(","));
+    return outputRow.doubleStream().mapToObj(d -> DECIMAL_FORMAT.format(d)).collect(joining(","));
   }
 
   public static void main(String[] args) throws FileNotFoundException {

@@ -26,7 +26,8 @@ public class Segmentator {
     }
   }
 
-  public static List<Changes> segment(DoubleArrayList dates, DoubleArrayList values, C2cSolver.Args args) {
+  public static List<Changes> segment(
+      DoubleArrayList dates, DoubleArrayList values, C2cSolver.Args args) {
     double maxError = args.maxError;
     int maxSegm = args.maxSegments;
     ArrayList<Segment> segments = new ArrayList<>();
@@ -120,7 +121,8 @@ public class Segmentator {
    * @param dates array of the date values of the time series.
    * @param values array of the values in the time series.
    * @param currIndex index of the current breakpoint to calculate regrowth metrics for
-   * @param magnitude the difference between the current breakpoint value and previous segment start.
+   * @param magnitude the difference between the current breakpoint value and previous segment
+   *     start.
    * @param args used for determining regrowth metric calculation behavior.
    */
   private static Changes.RegrowthMetric calculateRegrowthMetric(
@@ -139,7 +141,7 @@ public class Segmentator {
     int index60 = -1;
     if (!Double.isNaN(magnitude)) {
       // Note: regrowth metric extends beyond the current change window.
-      double preValue = magnitude - currValue;  // preValue is the start of the previous segment.
+      double preValue = magnitude - currValue; // preValue is the start of the previous segment.
       for (int i = currIndex + 1; i < values.size(); ++i) {
         final double value = values.getDouble(i);
         final double regrowthRatio;
@@ -188,7 +190,7 @@ public class Segmentator {
    *   <li>Null may be returned if the magnitude in Changes would be zero or positive and
    *       "negativeMagnitudeOnly" is true.
    * </ul>
-   * 
+   *
    * @param dates the array of date values in the provided timeseries.
    * @param values the array of values in the time series to calculate a change metric.
    * @param preIndex the start of the previous change segment.
@@ -228,22 +230,19 @@ public class Segmentator {
   }
 
   public static @Nullable Changes addRegrowthToChange(
-    DoubleArrayList dates,
-    DoubleArrayList values,
-    Changes change,
-    C2cSolver.Args args) {
-    var regrowth = 
-      calculateRegrowthMetric(
-        dates, values, change.dateIndex(), change.value(), change.magnitude(), args);
+      DoubleArrayList dates, DoubleArrayList values, Changes change, C2cSolver.Args args) {
+    var regrowth =
+        calculateRegrowthMetric(
+            dates, values, change.dateIndex(), change.value(), change.magnitude(), args);
     return Changes.create(
-      change.dateIndex(),
-      change.date(),
-      change.value(),
-      change.magnitude(),
-      change.duration(),
-      change.postMagnitude(),
-      change.postDuration(),
-      regrowth);
+        change.dateIndex(),
+        change.date(),
+        change.value(),
+        change.magnitude(),
+        change.duration(),
+        change.postMagnitude(),
+        change.postDuration(),
+        regrowth);
   }
 
   private static double lerp(double y1, double y2, double x) {

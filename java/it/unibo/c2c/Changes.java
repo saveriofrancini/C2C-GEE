@@ -20,7 +20,14 @@ public record Changes(
       new RegrowthMetric(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
   public static final Changes EMPTY =
       Changes.create(
-          -1, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, EMPTY_REGROWTH);
+          -1,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          EMPTY_REGROWTH);
 
   public static Changes create(
       int dateIndex,
