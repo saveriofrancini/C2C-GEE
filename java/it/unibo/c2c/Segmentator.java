@@ -84,8 +84,6 @@ public class Segmentator {
       }
       Changes c = changeMetricsCalculator(dates, values, leftIndex, centralIndex, rightIndex, args);
       segmented.add(c);
-      // System.out.println("Segment i: " + i + " start: " + currSegment.start + " end: " +
-      // currSegment.finish);
     }
     // add last change
     centralIndex = segments.get(segments.size() - 1).finish;
@@ -120,6 +118,7 @@ public class Segmentator {
    * @param dates array of the date values of the time series.
    * @param values array of the values in the time series.
    * @param currIndex index of the current breakpoint to calculate regrowth metrics for
+   * @param preValue the value of the start of the previous segment.
    * @param magnitude the difference between the current breakpoint value and previous segment
    *     start.
    * @param args used for determining regrowth metric calculation behavior.
@@ -139,7 +138,7 @@ public class Segmentator {
     int index100 = -1;
     int index80 = -1;
     int index60 = -1;
-    if (!Double.isNaN(magnitude)) {
+    if (!Double.isNaN(preValue)) {
       // Note: regrowth metric extends beyond the current change window.
       for (int i = currIndex + 1; i < values.size(); ++i) {
         final double value = values.getDouble(i);
@@ -187,7 +186,7 @@ public class Segmentator {
    *   <li>Post metrics are included if the arg `includePostMetrics` is true.
    * </ul>
    *
-   * @param dates the array of date values in the provided timeseries.
+   * @param dates the array of date values in the provided time series.
    * @param values the array of values in the time series to calculate a change metric.
    * @param preIndex the start of the previous change segment.
    * @param currIndex the start index of the current change segment.
