@@ -88,7 +88,7 @@ public class CommandLineMain {
     ArrayList<String> headers = new ArrayList<>();
     headers.add("id");
     headers.add("year");
-    headers.add("index");
+    headers.add("value");
     headers.add("magnitude");
     headers.add("duration");
     headers.add("rate");
@@ -150,16 +150,36 @@ public class CommandLineMain {
     if (!read.containsKey("inputFile")) {
       throw new FileNotFoundException("Missing required input file");
     }
+    int row;
+    if (read.containsKey("row")) {
+      row = Integer.valueOf(read.get("row"));
+    } else {
+      row = -1;
+    }
     var inputFile = new File(read.get("inputFile"));
     Csv inputCsv = Csv.vertical(new FileInputStream(inputFile));
     DoubleArrayList dates = inputCsv.getDates();
     var solver = new C2cSolver();
     ArrayList<List<Changes>> allChanges = new ArrayList<>();
-    printInputRow("id", inputCsv.getDates());
+    boolean printInputToErr = Boolean.valueOf(read.containsKey("printInput"));
+    if (printInputToErr) {
+      printInputRow("id", inputCsv.getDates());
+    }
+    if (row != -1) {
+      DoubleArrayList timeline = inputCsv.getRow(row, /* skip= */ 1);
+      allChanges.add(solver.c2cBottomUp(dates, timeline, c2cArgs));
+      if (printInputToErr) {
+        printInputRow(String.valueOf(row), timeline);
+      }
+      printChangeCsv(allChanges, c2cArgs);
+      return;
+    }
     for (int i = 0; i < inputCsv.values().get(0).size(); i++) {
       DoubleArrayList timeline = inputCsv.getRow(i, /* skip= */ 1);
       allChanges.add(solver.c2cBottomUp(dates, timeline, c2cArgs));
-      printInputRow(String.valueOf(i), timeline);
+      if (printInputToErr) {
+        printInputRow(String.valueOf(i), timeline);
+      }
     }
     printChangeCsv(allChanges, c2cArgs);
   }

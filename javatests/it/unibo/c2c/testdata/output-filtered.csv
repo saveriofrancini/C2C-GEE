@@ -1,4 +1,4 @@
-id,year,index,magnitude,duration,rate,postMagnitude,postDuration,postRate
+id,year,value,magnitude,duration,rate,postMagnitude,postDuration,postRate
 0,1995,383,-137,1,-137,212,1,212
 0,2014,499,-96,18,-5.333333333333333,-450,1,-450
 0,2015,49,-450,1,-450,226,4,56.5

@@ -34,6 +34,10 @@ public class C2cSolver {
     @Optional
     public double spikesTolerance = 0.85;
 
+    @Doc(help = "Spike removal magnitude. Spikes with a magnitude above this value are removed.")
+    @Optional
+    public double spikeRemovalMagnitude = 100.0;
+
     @Doc(help = "Add post metric information.")
     @Optional
     public boolean includePostMetrics = true;
@@ -65,28 +69,37 @@ public class C2cSolver {
       fillValues(values);
     }
     if (args.spikesTolerance < 1) {
-      despikeTimeLine(values, args.spikesTolerance);
+      despikeTimeLine(values, args.spikesTolerance, args.spikeRemovalMagnitude);
     }
 
     // Start segmentation.
-    if (args.includeRegrowth && args.interpolateRegrowth) {
-      args.includeRegrowth = false;
-      List<Changes> changes = Segmentator.segment(dates, values, args);
+    List<Changes> changes = Segmentator.segment(dates, values, args);
+    if (args.interpolateRegrowth) {
       interpolateValuesInplace(dates, values, changes);
-      args.includeRegrowth = true;
-      return interpolatedRegrowth(dates, values, changes, args);
-    } else {
-      return Segmentator.segment(dates, values, args);
     }
+    // Filter and calculate regrowth metrics.
+    if (args.includeRegrowth) {
+      changes = addRegrowth(dates, values, changes, args);
+    }
+    if (args.negativeMagnitudeOnly) {
+      // magnitude may be NaN which evaluates to false as intended.
+      changes = changes.stream().filter(c -> c.magnitude() < 0).toList();
+    }
+    return changes;
   }
 
-  List<Changes> interpolatedRegrowth(
+  List<Changes> addRegrowth(
       DoubleArrayList dates, DoubleArrayList values, List<Changes> changes, C2cSolver.Args args) {
-    double prevChangeValue = Double.NaN;
     ArrayList<Changes> changesWithRegrowth = new ArrayList<>();
-    for (Changes change : changes) {
-      changesWithRegrowth.add((Segmentator.addRegrowthToChange(dates, values, change, args)));
-      prevChangeValue = change.value();
+    if (changes.size() < 2) {
+      // We can only compute regrowth with more than 2 segments.
+      return changes;
+    }
+    changesWithRegrowth.add(changes.get(0));
+    for (int i = 1; i < changes.size(); i++) {
+      double preValue = changes.get(i - 1).value();
+      changesWithRegrowth.add(
+          (Segmentator.addRegrowthToChange(dates, values, changes.get(i), preValue, args)));
     }
     return changesWithRegrowth;
   }
@@ -146,7 +159,8 @@ public class C2cSolver {
     return -1;
   }
 
-  private static void despikeTimeLine(DoubleArrayList values, double spikesTolerance) {
+  private static void despikeTimeLine(
+      DoubleArrayList values, double spikesTolerance, double spikeRemovalMagnitude) {
     for (int i = 1; i < values.size() - 1; i++) {
       double left = values.getDouble(i - 1);
       double center = values.getDouble(i);
@@ -159,7 +173,7 @@ public class C2cSolver {
       //      #1# The value of the spike is greater than 100
       //      #2# The difference between spectral values on either side of the spike
       //      is less than 1-despike desawtooth proportion of the spike itself" (Landtrendr)
-      if (spikeValue > 100 && despikeProportion < (1 - spikesTolerance)) {
+      if (spikeValue > spikeRemovalMagnitude && despikeProportion < (1 - spikesTolerance)) {
         // double leftValueOfT = values.getDouble(i - 1);
         // double rightValueOfT = values.getDouble(i + 1);
         // double centerValueFittedOfT = (leftValueOfT + rightValueOfT) / 2;
@@ -191,32 +205,15 @@ public class C2cSolver {
     if (changes == null || changes.isEmpty()) {
       return;
     }
-    // Interpolation starts with the start of the series and ends at the start of the first
-    // breakpoint.
-    int endIndex = changes.get(0).dateIndex() - 1;
-    double x1 = dates.get(0);
-    double x2 = dates.get(endIndex);
-    double y1 = values.get(0);
-    double y2 = values.get(endIndex);
-    interpValues(dates, values, /* startIndex= */ 0, endIndex, x1, x2, y1, y2);
 
-    // Now interpolate between the rest of the breakpoints.
     for (int changeIndex = 0; changeIndex < changes.size() - 1; ++changeIndex) {
       Changes currChange = changes.get(changeIndex);
       int nextChangeIndex = changes.get(changeIndex + 1).dateIndex();
-      x1 = currChange.date();
-      x2 = dates.get(nextChangeIndex - 1);
-      y1 = currChange.value();
-      y2 = values.get(nextChangeIndex - 1);
+      double x1 = currChange.date();
+      double x2 = dates.get(nextChangeIndex);
+      double y1 = currChange.value();
+      double y2 = values.get(nextChangeIndex);
       interpValues(dates, values, currChange.dateIndex(), nextChangeIndex, x1, x2, y1, y2);
     }
-    // For the end of the series interpolate from the start of the last breakpoint until the end of
-    // the series.
-    Changes lastChange = changes.get(changes.size() - 1);
-    x1 = lastChange.date();
-    x2 = dates.get(dates.size() - 1);
-    y1 = lastChange.value();
-    y2 = values.get(values.size() - 1);
-    interpValues(dates, values, lastChange.dateIndex() + 1, values.size() - 1, x1, x2, y1, y2);
   }
 }
