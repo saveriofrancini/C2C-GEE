@@ -2,6 +2,7 @@ package it.unibo.c2c;
 
 /** Just a POD to record a change segment. */
 public record Changes(
+    int dateIndex,
     double date,
     double value,
     double magnitude,
@@ -19,9 +20,17 @@ public record Changes(
       new RegrowthMetric(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
   public static final Changes EMPTY =
       Changes.create(
-          Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, EMPTY_REGROWTH);
+          -1,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          EMPTY_REGROWTH);
 
   public static Changes create(
+      int dateIndex,
       double date,
       double value,
       double magnitude,
@@ -30,6 +39,7 @@ public record Changes(
       double postDuration,
       RegrowthMetric regrowthMetric) {
     return new Changes(
+        dateIndex,
         date,
         value,
         magnitude,

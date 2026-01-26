@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,18 +14,26 @@ import org.junit.runners.JUnit4;
 public class BottomupTest {
 
   private static final String SAMPLES_FILE = "/it/unibo/c2c/testdata/input.csv";
+  private static final String SAMPLES_NBR_FILE = "/it/unibo/c2c/testdata/input-nbr.csv";
   private static final String EXPECTED_FILE = "/it/unibo/c2c/testdata/output.csv";
   private static final String EXPECTED_FILTERED = "/it/unibo/c2c/testdata/output-filtered.csv";
   private static final String EXPECTED_REGROWTH =
       "/it/unibo/c2c/testdata/output-regrowth-negonly.csv";
+  private static final String EXPECTED_REGROWTH_INTERP =
+      "/it/unibo/c2c/testdata/output-regrowth-negonly-interp.csv";
   private static final String EXPECTED_REGROWTH_RELATIVE =
       "/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv";
+  private static final String EXPECTED_NBR_REGROWTH =
+      "/it/unibo/c2c/testdata/output-nbr-regrowth.csv";
+  private static final String EXPECTED_NBR_REGROWTH_INTERP =
+      "/it/unibo/c2c/testdata/output-nbr-regrowth-interp.csv";
+  private static final int EXPECTED_NULL_ROWS = 3;
 
   @Test
   public void c2c_defaultArgs() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
 
-    runGoldensTest(SAMPLES_FILE, EXPECTED_FILE, args);
+    runGoldensTest(SAMPLES_FILE, EXPECTED_FILE, EXPECTED_NULL_ROWS, args);
   }
 
   @Test
@@ -32,10 +41,10 @@ public class BottomupTest {
     C2cSolver.Args args = new C2cSolver.Args();
     args.negativeMagnitudeOnly = true;
     // To regenerate the golden data:
-    // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
+    // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input.csv \
     //   --negativeMagnitudeOnly > \
     //   javatests/it/unibo/c2c/testdata/output-filtered.csv
-    runGoldensTest(SAMPLES_FILE, EXPECTED_FILTERED, args);
+    runGoldensTest(SAMPLES_FILE, EXPECTED_FILTERED, EXPECTED_NULL_ROWS, args);
   }
 
   @Test
@@ -45,10 +54,24 @@ public class BottomupTest {
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
     // To regenerate the golden data:
-    // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
+    // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input.csv \
     //   --includePostMetrics=false --includeRegrowth=true --negativeMagnitudeOnly > \
     //   javatests/it/unibo/c2c/testdata/output-regrowth-negonly.csv
-    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, args);
+    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, EXPECTED_NULL_ROWS, args);
+  }
+
+  @Test
+  public void c2c_regrowth_noPostRate_interpolatedRegrowth() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+    args.includeRegrowth = true;
+    args.includePostMetrics = false;
+    args.negativeMagnitudeOnly = true;
+    args.interpolateRegrowth = true;
+    // To regenerate the golden data:
+    // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input.csv \
+    //   --includePostMetrics=false --includeRegrowth=true --interpolateRegrowth > \
+    //   javatests/it/unibo/c2c/testdata/output-regrowth-interp.csv
+    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH_INTERP, EXPECTED_NULL_ROWS, args);
   }
 
   @Test
@@ -58,14 +81,49 @@ public class BottomupTest {
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
     // To regenerate the golden data:
-    // bazel run --java_runtime_version=21 c2c -- javatests/it/unibo/c2c/testdata/input.csv \
+    // ./bazel-bin/c2c -- javatests/it/unibo/c2c/testdata/input.csv \
     //   --includePostMetrics=false --includeRegrowth=true --negativeMagnitudeOnly
     // --useRelativeRegrowth > \
     //   javatests/it/unibo/c2c/testdata/output-regrowth-relative-negonly.csv
-    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, args);
+    runGoldensTest(SAMPLES_FILE, EXPECTED_REGROWTH, EXPECTED_NULL_ROWS, args);
   }
 
-  private void runGoldensTest(String inputPath, String goldenPath, C2cSolver.Args args) {
+  @Test
+  public void c2c_nbr_regrowth_noPostRate() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+    args.includeRegrowth = true;
+    args.includePostMetrics = false;
+    args.negativeMagnitudeOnly = false;
+    args.interpolateRegrowth = false;
+    args.maxError = 0.075;
+    args.maxSegments = 6;
+    // To regenerate the golden data:
+    // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input-nbr.csv \
+    //   --maxError=0.075 --maxSegments=6 --negativeMagnitudeOnly=false
+    //   --includePostMetrics=false --includeRegrowth=true \
+    //   > javatests/it/unibo/c2c/testdata/output-nbr-regrowth.csv
+    runGoldensTest(SAMPLES_NBR_FILE, EXPECTED_NBR_REGROWTH, /* expectedNullRows= */ 0, args);
+  }
+
+  @Test
+  public void c2c_nbr_regrowth_noPostRate_interpolatedRegrowth() throws Exception {
+    C2cSolver.Args args = new C2cSolver.Args();
+    args.includeRegrowth = true;
+    args.includePostMetrics = false;
+    args.negativeMagnitudeOnly = false;
+    args.interpolateRegrowth = true;
+    args.maxError = 0.075;
+    args.maxSegments = 6;
+    // To regenerate the golden data:
+    // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input-nbr.csv \
+    //   --maxError=0.075 --maxSegments=6 --negativeMagnitudeOnly=false
+    //   --includePostMetrics=false --includeRegrowth=true --interpolateRegrowth=true \
+    //   > javatests/it/unibo/c2c/testdata/output-nbr-regrowth-interp.csv
+    runGoldensTest(SAMPLES_NBR_FILE, EXPECTED_NBR_REGROWTH_INTERP, /* expectedNullRows= */ 0, args);
+  }
+
+  private void runGoldensTest(
+      String inputPath, String goldenPath, int expectedNullRows, C2cSolver.Args args) {
     // Read input file.  It has dates as column headers and each row is a full timeline.
     Csv inputs = Csv.vertical(getClass().getResourceAsStream(inputPath));
     DoubleArrayList dates = inputs.getDates();
@@ -76,6 +134,7 @@ public class BottomupTest {
     // Apply the Main function on each timeLine.
     int nullCount = 0;
     C2cSolver solver = new C2cSolver();
+    ArrayList<Integer> nullRowList = new ArrayList<Integer>();
     for (int i = 0; i < numberOfInputs; i++) {
       // The inputs have a plot ID in the first column that isn't used in the timeline.  Skip it.
       DoubleArrayList timeline = inputs.getRow(i, /* skip= */ 1);
@@ -87,12 +146,16 @@ public class BottomupTest {
           throw new AssertionError(String.format("Failure for input %s", i), e);
         }
       } else {
-        System.out.println("null line: " + i);
-        nullCount++;
+        nullRowList.add(i);
       }
     }
     // There are 3 inputs that don't have enough points.
-    assertEquals(3, nullCount);
+    assertEquals(
+        String.format(
+            "Expected missing row count of: %d, found %d (%s)",
+            expectedNullRows, nullRowList.size(), nullRowList),
+        expectedNullRows,
+        nullRowList.size());
   }
 
   /** Verify that the changes match the expected values. */
@@ -127,8 +190,9 @@ public class BottomupTest {
       }
       Changes expectedChanges =
           new Changes(
+              -1, // don't compare date index.
               expected.getColumn("year").getDouble(j),
-              expected.getColumn("index").getDouble(j),
+              expected.getColumn("value").getDouble(j),
               expected.getColumn("magnitude").getDouble(j),
               expected.getColumn("duration").getDouble(j),
               args.includePostMetrics

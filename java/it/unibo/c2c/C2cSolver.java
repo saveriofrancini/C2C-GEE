@@ -2,6 +2,7 @@ package it.unibo.c2c;
 
 import com.google.earthengine.api.base.ArgsBase;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 
@@ -33,6 +34,10 @@ public class C2cSolver {
     @Optional
     public double spikesTolerance = 0.85;
 
+    @Doc(help = "Spike removal magnitude. Spikes with a magnitude above this value are removed.")
+    @Optional
+    public double spikeRemovalMagnitude = 100.0;
+
     @Doc(help = "Add post metric information.")
     @Optional
     public boolean includePostMetrics = true;
@@ -40,6 +45,10 @@ public class C2cSolver {
     @Doc(help = "Add regrowth information.")
     @Optional
     public boolean includeRegrowth = false;
+
+    @Doc(help = "Use changes to linearly interpolate regrowth metrics.")
+    @Optional
+    public boolean interpolateRegrowth = false;
 
     @Doc(help = "Calculate regrowth by % of positive magnitude.")
     @Optional
@@ -60,10 +69,39 @@ public class C2cSolver {
       fillValues(values);
     }
     if (args.spikesTolerance < 1) {
-      despikeTimeLine(values, args.spikesTolerance);
+      despikeTimeLine(values, args.spikesTolerance, args.spikeRemovalMagnitude);
     }
+
     // Start segmentation.
-    return Segmentator.segment(dates, values, args);
+    List<Changes> changes = Segmentator.segment(dates, values, args);
+    if (args.interpolateRegrowth) {
+      interpolateValuesInplace(dates, values, changes);
+    }
+    // Filter and calculate regrowth metrics.
+    if (args.includeRegrowth) {
+      changes = addRegrowth(dates, values, changes, args);
+    }
+    if (args.negativeMagnitudeOnly) {
+      // magnitude may be NaN which evaluates to false as intended.
+      changes = changes.stream().filter(c -> c.magnitude() < 0).toList();
+    }
+    return changes;
+  }
+
+  List<Changes> addRegrowth(
+      DoubleArrayList dates, DoubleArrayList values, List<Changes> changes, C2cSolver.Args args) {
+    ArrayList<Changes> changesWithRegrowth = new ArrayList<>();
+    if (changes.size() < 2) {
+      // We can only compute regrowth with more than 2 segments.
+      return changes;
+    }
+    changesWithRegrowth.add(changes.get(0));
+    for (int i = 1; i < changes.size(); i++) {
+      double preValue = changes.get(i - 1).value();
+      changesWithRegrowth.add(
+          (Segmentator.addRegrowthToChange(dates, values, changes.get(i), preValue, args)));
+    }
+    return changesWithRegrowth;
   }
 
   private static void fillValues(DoubleArrayList values) {
@@ -121,7 +159,8 @@ public class C2cSolver {
     return -1;
   }
 
-  private static void despikeTimeLine(DoubleArrayList values, double spikesTolerance) {
+  private static void despikeTimeLine(
+      DoubleArrayList values, double spikesTolerance, double spikeRemovalMagnitude) {
     for (int i = 1; i < values.size() - 1; i++) {
       double left = values.getDouble(i - 1);
       double center = values.getDouble(i);
@@ -134,12 +173,47 @@ public class C2cSolver {
       //      #1# The value of the spike is greater than 100
       //      #2# The difference between spectral values on either side of the spike
       //      is less than 1-despike desawtooth proportion of the spike itself" (Landtrendr)
-      if (spikeValue > 100 && despikeProportion < (1 - spikesTolerance)) {
+      if (spikeValue > spikeRemovalMagnitude && despikeProportion < (1 - spikesTolerance)) {
         // double leftValueOfT = values.getDouble(i - 1);
         // double rightValueOfT = values.getDouble(i + 1);
         // double centerValueFittedOfT = (leftValueOfT + rightValueOfT) / 2;
         values.set(i, fitted);
       }
+    }
+  }
+
+  private static void interpValues(
+      DoubleArrayList dates,
+      DoubleArrayList values,
+      int startIndex,
+      int endIndex,
+      double x1,
+      double x2,
+      double y1,
+      double y2) {
+    for (int i = startIndex; i < endIndex; i++) {
+      double x = dates.get(i);
+      double interpValue = y1 + (y2 - y1) * (x - x1) / (x2 - x1);
+      values.set(i, interpValue);
+    }
+  }
+
+  /** Linearly interpolates the input timeline values using the changes breakpoints. */
+  private static void interpolateValuesInplace(
+      DoubleArrayList dates, DoubleArrayList values, List<Changes> changes) {
+
+    if (changes == null || changes.isEmpty()) {
+      return;
+    }
+
+    for (int changeIndex = 0; changeIndex < changes.size() - 1; ++changeIndex) {
+      Changes currChange = changes.get(changeIndex);
+      int nextChangeIndex = changes.get(changeIndex + 1).dateIndex();
+      double x1 = currChange.date();
+      double x2 = dates.get(nextChangeIndex);
+      double y1 = currChange.value();
+      double y2 = values.get(nextChangeIndex);
+      interpValues(dates, values, currChange.dateIndex(), nextChangeIndex, x1, x2, y1, y2);
     }
   }
 }

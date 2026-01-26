@@ -1,4 +1,7 @@
 load("@rules_jvm_external//:defs.bzl", "artifact")
+load("@rules_java//java:java_binary.bzl", "java_binary")
+load("@rules_java//java:java_library.bzl", "java_library")
+load("@rules_java//java:java_test.bzl", "java_test")
 
 java_library(
     name = "c2c_gee",
@@ -44,9 +47,13 @@ java_test(
     ],
     resources = [
         "javatests/it/unibo/c2c/testdata/input.csv",
+        "javatests/it/unibo/c2c/testdata/input-nbr.csv",
         "javatests/it/unibo/c2c/testdata/output.csv",
         "javatests/it/unibo/c2c/testdata/output-filtered.csv",
         "javatests/it/unibo/c2c/testdata/output-regrowth-negonly.csv",
+        "javatests/it/unibo/c2c/testdata/output-regrowth-negonly-interp.csv",
+        "javatests/it/unibo/c2c/testdata/output-nbr-regrowth.csv",
+        "javatests/it/unibo/c2c/testdata/output-nbr-regrowth-interp.csv",
     ],
     deps = [
         ":c2c_gee",

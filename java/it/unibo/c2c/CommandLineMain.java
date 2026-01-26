@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CommandLineMain {
 
@@ -76,11 +75,20 @@ public class CommandLineMain {
     return result;
   }
 
+  private static void printInputRow(String firstCol, DoubleArrayList values) {
+    StringBuilder builder = new StringBuilder(firstCol);
+    for (int i = 0; i < values.size(); ++i) {
+      builder.append(',');
+      builder.append(values.get(i));
+    }
+    System.err.println(builder.toString());
+  }
+
   private static void printChangeCsv(List<List<Changes>> allChanges, C2cSolver.Args args) {
     ArrayList<String> headers = new ArrayList<>();
     headers.add("id");
     headers.add("year");
-    headers.add("index");
+    headers.add("value");
     headers.add("magnitude");
     headers.add("duration");
     headers.add("rate");
@@ -133,10 +141,7 @@ public class CommandLineMain {
       outputRow.add(c.regrowth80());
       outputRow.add(c.regrowth100());
     }
-    return outputRow
-            .doubleStream()
-            .mapToObj(d -> DECIMAL_FORMAT.format(d))
-            .collect(joining(","));
+    return outputRow.doubleStream().mapToObj(d -> DECIMAL_FORMAT.format(d)).collect(joining(","));
   }
 
   public static void main(String[] args) throws FileNotFoundException {
@@ -145,14 +150,36 @@ public class CommandLineMain {
     if (!read.containsKey("inputFile")) {
       throw new FileNotFoundException("Missing required input file");
     }
+    int row;
+    if (read.containsKey("row")) {
+      row = Integer.valueOf(read.get("row"));
+    } else {
+      row = -1;
+    }
     var inputFile = new File(read.get("inputFile"));
     Csv inputCsv = Csv.vertical(new FileInputStream(inputFile));
     DoubleArrayList dates = inputCsv.getDates();
     var solver = new C2cSolver();
     ArrayList<List<Changes>> allChanges = new ArrayList<>();
+    boolean printInputToErr = Boolean.valueOf(read.containsKey("printInput"));
+    if (printInputToErr) {
+      printInputRow("id", inputCsv.getDates());
+    }
+    if (row != -1) {
+      DoubleArrayList timeline = inputCsv.getRow(row, /* skip= */ 1);
+      allChanges.add(solver.c2cBottomUp(dates, timeline, c2cArgs));
+      if (printInputToErr) {
+        printInputRow(String.valueOf(row), timeline);
+      }
+      printChangeCsv(allChanges, c2cArgs);
+      return;
+    }
     for (int i = 0; i < inputCsv.values().get(0).size(); i++) {
       DoubleArrayList timeline = inputCsv.getRow(i, /* skip= */ 1);
       allChanges.add(solver.c2cBottomUp(dates, timeline, c2cArgs));
+      if (printInputToErr) {
+        printInputRow(String.valueOf(i), timeline);
+      }
     }
     printChangeCsv(allChanges, c2cArgs);
   }

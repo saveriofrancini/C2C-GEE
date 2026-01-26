@@ -1,4 +1,4 @@
-id,year,index,magnitude,duration,rate,postMagnitude,postDuration,postRate
+id,year,value,magnitude,duration,rate,postMagnitude,postDuration,postRate
 0,1984,498,NaN,NaN,NaN,22,10,2.2
 0,1994,520,22,10,2.2,-137,1,-137
 0,1995,383,-137,1,-137,212,1,212
