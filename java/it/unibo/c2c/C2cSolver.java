@@ -60,7 +60,12 @@ public class C2cSolver {
   }
 
   public @Nullable List<Changes> c2cBottomUp(
-      DoubleArrayList dates, DoubleArrayList values, Args args) {
+      DoubleArrayList dates,
+      DoubleArrayList values,
+      double maxError,
+      double spikesTolerance,
+      double spikeRemovalMagnitude,
+      Args args) {
     if (values.doubleStream().filter(v -> v != 0).count() < 3) {
       return null;
     }
@@ -69,11 +74,11 @@ public class C2cSolver {
       fillValues(values);
     }
     if (args.spikesTolerance < 1) {
-      despikeTimeLine(values, args.spikesTolerance, args.spikeRemovalMagnitude);
+      despikeTimeLine(values, spikesTolerance, spikeRemovalMagnitude);
     }
 
     // Start segmentation.
-    List<Changes> changes = Segmentator.segment(dates, values, args);
+    List<Changes> changes = Segmentator.segment(dates, values, maxError, args);
     if (args.interpolateRegrowth) {
       interpolateValuesInplace(dates, values, changes);
     }
@@ -86,6 +91,12 @@ public class C2cSolver {
       changes = changes.stream().filter(c -> c.magnitude() < 0).toList();
     }
     return changes;
+  }
+
+  public @Nullable List<Changes> c2cBottomUp(
+      DoubleArrayList dates, DoubleArrayList values, Args args) {
+    return c2cBottomUp(
+        dates, values, args.maxError, args.spikesTolerance, args.spikeRemovalMagnitude, args);
   }
 
   List<Changes> addRegrowth(
