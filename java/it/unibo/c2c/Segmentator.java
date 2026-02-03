@@ -27,8 +27,7 @@ public class Segmentator {
   }
 
   public static List<Changes> segment(
-      DoubleArrayList dates, DoubleArrayList values, C2cSolver.Args args) {
-    double maxError = args.maxError;
+      DoubleArrayList dates, DoubleArrayList values, double maxError, C2cSolver.Args args) {
     int maxSegm = args.maxSegments;
     ArrayList<Segment> segments = new ArrayList<>();
     ArrayList<Double> mergeCost = new ArrayList<>();
