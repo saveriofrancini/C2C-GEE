@@ -73,7 +73,7 @@ public class C2cSolver {
     if (args.infill) {
       fillValues(values);
     }
-    if (args.spikesTolerance < 1) {
+    if (spikesTolerance < 1) {
       despikeTimeLine(values, spikesTolerance, spikeRemovalMagnitude);
     }
 
