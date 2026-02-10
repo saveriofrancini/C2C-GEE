@@ -30,15 +30,19 @@ public class BottomupTest {
   private static final int EXPECTED_NULL_ROWS = 3;
 
   @Test
-  public void c2c_defaultArgs() throws Exception {
+  public void c2c_simple() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
-
+    args.maxError = 75.0;
+    args.spikeRemovalMagnitude = 100.0;
+    args.interpolateRegrowth = false;
     runGoldensTest(SAMPLES_FILE, EXPECTED_FILE, EXPECTED_NULL_ROWS, args);
   }
 
   @Test
   public void c2c_negativeMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
+    args.maxError = 75.0;
+    args.spikeRemovalMagnitude = 100.0;
     args.negativeMagnitudeOnly = true;
     // To regenerate the golden data:
     // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input.csv \
@@ -50,6 +54,9 @@ public class BottomupTest {
   @Test
   public void c2c_regrowth_noPostRate_negitiveMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
+    args.maxError = 75.0;
+    args.spikeRemovalMagnitude = 100.0;
+    args.interpolateRegrowth = false;
     args.includeRegrowth = true;
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
@@ -63,6 +70,8 @@ public class BottomupTest {
   @Test
   public void c2c_regrowth_noPostRate_interpolatedRegrowth() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
+    args.maxError = 75.0;
+    args.spikeRemovalMagnitude = 100.0;
     args.includeRegrowth = true;
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
@@ -77,6 +86,9 @@ public class BottomupTest {
   @Test
   public void c2c_regrowth_relative_noPostRate_negitiveMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
+    args.maxError = 75.0;
+    args.spikeRemovalMagnitude = 100.0;
+    args.interpolateRegrowth = false;
     args.includeRegrowth = true;
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = true;
@@ -91,12 +103,11 @@ public class BottomupTest {
   @Test
   public void c2c_nbr_regrowth_noPostRate() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
+    args.maxError = 0.075;
     args.includeRegrowth = true;
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = false;
     args.interpolateRegrowth = false;
-    args.maxError = 0.075;
-    args.maxSegments = 6;
     // To regenerate the golden data:
     // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input-nbr.csv \
     //   --maxError=0.075 --maxSegments=6 --negativeMagnitudeOnly=false
@@ -108,12 +119,11 @@ public class BottomupTest {
   @Test
   public void c2c_nbr_regrowth_noPostRate_interpolatedRegrowth() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
+    args.maxError = 0.075;
     args.includeRegrowth = true;
     args.includePostMetrics = false;
     args.negativeMagnitudeOnly = false;
     args.interpolateRegrowth = true;
-    args.maxError = 0.075;
-    args.maxSegments = 6;
     // To regenerate the golden data:
     // ./bazel-bin/c2c --inputFile=javatests/it/unibo/c2c/testdata/input-nbr.csv \
     //   --maxError=0.075 --maxSegments=6 --negativeMagnitudeOnly=false

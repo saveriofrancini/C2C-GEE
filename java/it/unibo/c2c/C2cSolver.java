@@ -10,51 +10,52 @@ import org.jspecify.annotations.Nullable;
 public class C2cSolver {
 
   public static class Args extends ArgsBase {
-    @Doc(help = "Maximum error (RMSE) allowed to remove points and construct segments.")
+    @Doc(
+        "Maximum allowed RMSE of the piecewise linear fit; " + "controls segmentation sensitivity.")
     @Optional
-    public double maxError = 75;
+    public double maxError = 0.075;
 
-    @Doc(help = "Maximum number of segments to be fitted on the time series.")
+    @Doc("Maximum number of segments permitted in the fitted tajectory.")
     @Optional
     public int maxSegments = 6;
 
-    @Doc(help = "Year of the first image in the output image collection.")
-    @Optional
-    public int startYear = 1984;
-
-    @Doc(help = "Year of the last image in the output image collection.")
-    @Optional
-    public int endYear = 2019;
-
-    @Doc(help = "Whether to apply the pre-infill process.")
+    @Doc(
+        "Enables gap infilling within the time series to support"
+            + " stable fitting in the presence of missing values (i.e., values equal to 0).")
     @Optional
     public boolean infill = true;
 
-    @Doc(help = "Tolerance of spikes in the time series. A value of 1 indicates no spike removal.")
+    @Doc(
+        "Controls tolerance of spikes in the time series. Ranges from 0 to 1."
+            + " A value of 1 indicates no spike removal, lower values are more aggressive.")
     @Optional
     public double spikesTolerance = 0.85;
 
-    @Doc(help = "Spike removal magnitude. Spikes with a magnitude above this value are removed.")
+    @Doc(
+        "Spike removal magnitude threshold. Spikes with a magnitude "
+            + "(absolute difference from the average of neighbors) above this value are removed.")
     @Optional
-    public double spikeRemovalMagnitude = 100.0;
+    public double spikeRemovalMagnitude = 0.1;
 
-    @Doc(help = "Add post metric information.")
+    @Doc("Returns post-change descriptors (postMagnitude, postDuration, postRate).")
     @Optional
     public boolean includePostMetrics = true;
 
-    @Doc(help = "Add regrowth information.")
+    @Doc("Returns recovery/regrowth metrics (indexRegrowth, recoveryIndicator, regrowth60/80/100).")
     @Optional
     public boolean includeRegrowth = false;
 
-    @Doc(help = "Use changes to linearly interpolate regrowth metrics.")
+    @Doc(
+        "Linearly interpolate the time series using the detected changes before calculating the"
+            + " regrowth metrics.")
     @Optional
-    public boolean interpolateRegrowth = false;
+    public boolean interpolateRegrowth = true;
 
-    @Doc(help = "Calculate regrowth by % of positive magnitude.")
+    @Doc("Computes regrowth thresholds in relative terms to pre-disturbance conditions.")
     @Optional
     public boolean useRelativeRegrowth = false;
 
-    @Doc(help = "Whether filter out changes having a non-negative magnitude.")
+    @Doc("Retains only breakpoints associated with negative changes (directional filtering).")
     @Optional
     public boolean negativeMagnitudeOnly = false;
   }
