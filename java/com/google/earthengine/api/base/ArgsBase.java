@@ -59,6 +59,6 @@ public abstract class ArgsBase {
     @Target({ElementType.FIELD})
     @Retention(RetentionPolicy.RUNTIME)
     protected @interface Doc {
-        String help() default "";
+        String value() default "";
     }
 }
