@@ -66,11 +66,9 @@ See:
 
 - Algorithm implementation can be found on GitHub: <https://github.com/saveriofrancini/C2C-GEE>
 
-Acknowledgements: FORWARDS and NextGenCarbon.
-
 Citation: 
 ```
-Txomin Hermosilla, Michael A. Wulder, Joanne C. White, Nicholas C. Coops, Daniel Coelho, Giovanni Ciatto, Noel Gorelick, and Saverio Francini. In preparation. Image compositing, time-series change detection and temporal metrics: Implementation of the Composite2Change (C2C) algorithm on Google Earth Engine.
+Hermosilla, T., Wulder, M.A., White, J.C., Coops, N.C., Coelho, D., Ciatto, G., Gorelick, N., Francini, S., 2026. Composite2Change (C2C) on Google Earth Engine: Time-series change detection and metrics characterizing disturbance and recovery. Environmental Modelling & Software (Submitted March 4, 2026).
 ```
 
 This algorithm is in preview and is subject to change.
@@ -125,16 +123,14 @@ conditions.
 - ***`negativeMagnitudeOnly`*** (type: `Boolean`, default: `false`): Retains only breakpoints associated with negative changes (directional
 filtering).
 
-## C2C GEE repository (users/sfrancini/C2C)
+## [C2C GEE repository](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C)
 
-This link creates a repository in your scripts "Reader" section. 
+[This link](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C) creates a repository in your scripts "Reader" section. 
 If it doesn't appear, click on the refresh button next to the "New" orange button.
 
 In the C2C GEE repository, you can find a library including useful
 functions to manage C2C-GEE row outputs and to show the results,
 including a function to plot the output as a time series
-
-XXXXX
 
 To test C2C GEE, different input time series are available
 
@@ -179,20 +175,27 @@ For more information on how these composites are calculated and on the
 BAP parameters (the third suggested composite), see Francini et al.,
 (2023)
 
-Examples of the output obtained using the test code in the C2C-GEE
-repository. If you do not want to clone the repository, you can access
-the code using this link. However, please note that, unlike the test
-code in the C2C-GEE repository, this link is static and the code will
-remain the same even if further modifications are made to the
-repository.
+Below are shown examples of the outputs obtained using the 'test' sciprt in the C2C-GEE
+repository. 
 
 ### Greatest disturbance severity
 
 ![Disturbance Severity](.img/disturbanceSeverity.png)
 
+<figure>
+  <img src=".img/disturbanceSeverity.png" alt="Disturbance Severity">
+  <figcaption><strong>Figure 1:</strong> Disturbance Severity</figcaption>
+</figure>
+
 ![Disturbance recovery](.img/yearstorecovery.png)
 
 ![Disturbance year](.img/disturbanceyear.png)
+
+If you do not want to clone the repository, you can access
+the code using this link. However, please note that, unlike the test
+code in the C2C-GEE repository, this link is static and the code will
+remain the same even if further modifications are made to the
+repository.
 
 ```javascript
 // for info saverio.francini@unibo.it
@@ -292,8 +295,11 @@ var joinedCollections = C2Clibrary.joinCollections(cmp, disturbanceCollection, '
 C2Clibrary.plotTS(joinedCollections);
 ```
 
-## Reference
+# Acknowledgements
+## FORWARDS. H2020 project funded by the European Commission, number 101084481 call HORIZON-CL6-2022-CLIMATE-01-05
+## NextGenCarbon. H2020 project funded by the European Commission, number 101184989 call HORIZON-CL5-2024-D1-01-07
 
+## Reference
 Hermosilla, T., Wulder, M. A., White, J. C., Coops, N. C., Coelho, D., Ciatto, G., Gorelick, N., & Francini, S. (under review).
 *Composite2Change (C2C) on Google Earth Engine: Time-series change
 detection and metrics characterizing disturbance and recovery*.
