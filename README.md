@@ -175,27 +175,27 @@ For more information on how these composites are calculated and on the
 BAP parameters (the third suggested composite), see Francini et al.,
 (2023)
 
-Below are shown examples of the outputs obtained using the 'test' sciprt in the C2C-GEE
+Below are shown examples of the different forest disturbance and recovery metrics obtained using the 'test' sciprt in the C2C-GEE
 repository. 
-
-### Greatest disturbance severity
-
-![Disturbance Severity](.img/disturbanceSeverity.png)
 
 <figure>
   <img src=".img/disturbanceSeverity.png" alt="Disturbance Severity">
-  <figcaption><strong>Figure 1:</strong> Disturbance Severity</figcaption>
+  <figcaption><strong>Figure 1:</strong> Disturbance severity</figcaption>
 </figure>
 
-![Disturbance recovery](.img/yearstorecovery.png)
+<figure>
+  <img src=".img/yearstorecovery.png" alt="Disturbance Recovery">
+  <figcaption><strong>Figure 2:</strong> Disturbance recovery</figcaption>
+</figure>
 
-![Disturbance year](.img/disturbanceyear.png)
+<figure>
+  <img src=".img/disturbanceyear.png" alt="Disturbance year">
+  <figcaption><strong>Figure 3:</strong> Disturbance year</figcaption>
+</figure>
 
 If you do not want to clone the repository, you can access
-the code using this link. However, please note that, unlike the test
-code in the C2C-GEE repository, this link is static and the code will
-remain the same even if further modifications are made to the
-repository.
+the code using [this link](https://code.earthengine.google.com/f4ac48aea4ae9365f2e4a9a2133da3c6). The link will redirect you to GEE, where **after a few seconds** you will be able to view the outputs generated dynamically.
+However, please note that, unlike the test code in the C2C-GEE repository, this link is static and the code will remain the same even if further modifications are made to the repository.
 
 ```javascript
 // for info saverio.francini@unibo.it
