@@ -125,40 +125,31 @@ filtering).
 
 ## [C2C GEE repository](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C)
 
-[This link](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C) creates a repository in your scripts "Reader" section. 
-If it doesn't appear, click on the refresh button next to the "New" orange button.
+[This link](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C) creates a repository in your scripts "Reader" section where you can find a library including useful functions to manage C2C-GEE row outputs and metrics and to visualise the output of the segmentation process by generating a plot in the console.
 
-In the C2C GEE repository, you can find a library including useful
-functions to manage C2C-GEE row outputs and to show the results,
-including a function to plot the output as a time series
+To test C2C GEE, different input time series are available as image collections
 
-To test C2C GEE, different input time series are available
-
-- Landsat medoid composite for Europe at 30 meters resolution
+- Landsat medoid composites for Europe at 30 meters resolution
 
   ```javascript
   var cmp = ee.ImageCollection("projects/planetunifi/assets/MedoidLandsat_v2");
   ```
 
-- Landsat medoid global composite\*\* at 500 meters resolution
+- Landsat medoid global composites\*\* at 500 meters resolution
 
   ```javascript 
   var cmp = ee.ImageCollection("projects/planetunifi/assets/GlobalMedoid");
   ```
 
-  > \*\*Note that this composite was generated using images acquired
-  throughout the entire year and, depending on the intended application,
-  it may not be the best option. We suggest using it mainly for testing
-  the code and visualizing the outputs.
+  > \*\*Note that this composite was generated using images acquired throughout the entire year and, depending on the intended application, it may not be the best option. We suggest using it mainly for testing the code.
 
-- Landsat BAP composite
+- Landsat BAP composites can be generated globally on the fly
 
   ```javascript
   var cmp = BAPlibrary.BAP(null, "07-15", 45, 70, 0.7, 0.2, 0.3, 1500);
   ```
 
-See the BAP GitHub page for more info
-<https://github.com/saveriofrancini/bap>
+See [Francini et al.,(2023)](https://doi.org/10.1016/j.isprsjprs.2023.06.002) and the [BAP GitHub page](https://github.com/saveriofrancini/bap) for more info on BAP usage and parameters configuration.
 
 Setting the first argument as null, the BAP library will calculate BAP
 composites globally slowing consistently the visualization process. To
