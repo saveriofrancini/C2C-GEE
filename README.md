@@ -1,5 +1,9 @@
 ![](.img/big.png)
 
+<p align="center">
+  <img src=".img/C2C-GEE_visualization_30m.gif" alt="visualization" width="800">
+</p>
+
 # C2C-GEE
 
 A Google Earth Engine (GEE) implementation of the Composite To Change (C2C) disturbance mapping and change-recovery metrics calculation algorithm.
