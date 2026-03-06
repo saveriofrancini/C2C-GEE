@@ -1,5 +1,9 @@
 ![](.img/big.png)
 
+<p align="center">
+  <img src=".img/C2C-GEE_visualization_30m.gif" alt="visualization" width="800">
+</p>
+
 # C2C-GEE
 
 A Google Earth Engine (GEE) implementation of the Composite To Change (C2C) disturbance mapping and change-recovery metrics calculation algorithm.
@@ -78,8 +82,8 @@ This algorithm is in preview and is subject to change.
 - ***`collection`*** (type: `ImageCollection`): Collection of images on which to run C2C.
 
 - ***`dateFormat`*** (type: `Integer`, default: `0`): The time representation to use during fitting: 
-  * 0 = jDays, 
-  * 1 = fractional years, 
+  * 0 = Days, 
+  * 1 = Fractional years, 
   * 2 = Unix time in milliseconds. 
   
   The start, end and break times for
@@ -151,40 +155,40 @@ To test C2C GEE, different input time series are available as image collections
 
 See [Francini et al.,(2023)](https://doi.org/10.1016/j.isprsjprs.2023.06.002) and the [BAP GitHub page](https://github.com/saveriofrancini/bap) for more info on BAP usage and parameters configuration.
 
-Setting the first argument as null, the BAP library will calculate BAP
-composites globally slowing consistently the visualization process. To
-speed up the think you can drow a geometry over your study area and
-replacing null with that geometry. In this way the composite will be
-calculated using jkusty the images that overlap with the geometry,
-speeding up consistently the process
+Setting the first argument as "null", the BAP library will calculate BAP
+composites globally, considerably slowing the visualization process. To
+speed up computing, you can draw a geometry over your study area and
+replace "null" with "geometry". In this way the composite will be
+calculated using the images that overlap with "geometry", substantially
+speeding up the process.
 
 ```javascript
 var cmp = BAPlibrary.BAP(geometry, "07-15", 45, 70, 0.7, 0.2, 0.3, 1500);
 ```
 
-For more information on how these composites are calculated and on the
+For more information on how these composites are calculated, and on the
 BAP parameters (the third suggested composite), see Francini et al.,
 (2023)
 
-Below are shown examples of the different forest disturbance and recovery metrics obtained using the 'test' sciprt in the C2C-GEE
+Below are examples of the different forest disturbance and recovery metrics obtained using the 'test' sciprt in the C2C-GEE
 repository. 
 
-<figure>
+<p align="left">
   <img src=".img/disturbanceSeverity.png" alt="Disturbance Severity">
-  <figcaption><strong>Figure 1:</strong> Disturbance severity</figcaption>
-</figure>
+  <em><strong>Figure 1:</strong> Disturbance severity</em>
+</p>
 
-<figure>
+<p align="left">
   <img src=".img/yearstorecovery.png" alt="Disturbance Recovery">
-  <figcaption><strong>Figure 2:</strong> Disturbance recovery</figcaption>
-</figure>
+  <em><strong>Figure 2:</strong> Disturbance recovery</em>
+</p>
 
-<figure>
+<p align="left">
   <img src=".img/disturbanceyear.png" alt="Disturbance year">
-  <figcaption><strong>Figure 3:</strong> Disturbance year</figcaption>
-</figure>
+  <em><strong>Figure 3:</strong> Disturbance year</em>
+</p>
 
-If you do not want to clone the repository, you can access
+<br>If you do not want to clone the repository, you can access
 the code using [this link](https://code.earthengine.google.com/f4ac48aea4ae9365f2e4a9a2133da3c6). The link will redirect you to GEE, where **after a few seconds** you will be able to view the outputs generated dynamically.
 However, please note that, unlike the test code in the C2C-GEE repository, this link is static and the code will remain the same even if further modifications are made to the repository.
 
