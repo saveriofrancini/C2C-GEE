@@ -52,7 +52,7 @@ public class BottomupTest {
   }
 
   @Test
-  public void c2c_regrowth_noPostRate_negitiveMagnitudes() throws Exception {
+  public void c2c_regrowth_noPostRate_negativeMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
     args.maxError = 75.0;
     args.spikeRemovalMagnitude = 100.0;
@@ -84,7 +84,7 @@ public class BottomupTest {
   }
 
   @Test
-  public void c2c_regrowth_relative_noPostRate_negitiveMagnitudes() throws Exception {
+  public void c2c_regrowth_relative_noPostRate_negativeMagnitudes() throws Exception {
     C2cSolver.Args args = new C2cSolver.Args();
     args.maxError = 75.0;
     args.spikeRemovalMagnitude = 100.0;

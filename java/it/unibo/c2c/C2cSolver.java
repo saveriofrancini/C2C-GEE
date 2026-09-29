@@ -15,7 +15,7 @@ public class C2cSolver {
     @Optional
     public double maxError = 0.075;
 
-    @Doc("Maximum number of segments permitted in the fitted tajectory.")
+    @Doc("Maximum number of segments permitted in the fitted trajectory.")
     @Optional
     public int maxSegments = 6;
 
