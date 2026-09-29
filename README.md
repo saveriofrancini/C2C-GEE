@@ -10,7 +10,7 @@ A Google Earth Engine (GEE) implementation of the Composite To Change (C2C) dist
 
 ## GEE documentation
 
-An implementation of the Composite 2 Change (C2C) algorithm. 
+An implementation of the Composite 2 Change (C2C) algorithm.
 This
 algorithm segments a time series using a piecewise linear fit with the
 minimum number of segments required to fit the data within the given
@@ -65,12 +65,12 @@ per-band.
   date and the data point where the series value is 100% of the
   pre-disturbance value.
 
-See: 
+See:
 - Hermosilla et al. (2015) <https://doi.org/10.1016/j.rse.2014.11.005> for further details on the original algorithm
 
 - Algorithm implementation can be found on GitHub: <https://github.com/saveriofrancini/C2C-GEE>
 
-Citation: 
+Citation:
 ```
 Hermosilla, T., Wulder, M.A., White, J.C., Coops, N.C., Coelho, D., Ciatto, G., Gorelick, N., Bambagioni, E., Francini, S., 2026. Composite2Change (C2C) on Google Earth Engine: Time-series change detection and metrics characterizing disturbance and recovery. Environmental Modelling and Software 204, 107082. https://doi.org/10.1016/j.envsoft.2026.107082
 ```
@@ -81,11 +81,11 @@ This algorithm is in preview and is subject to change.
 
 - ***`collection`*** (type: `ImageCollection`): Collection of images on which to run C2C.
 
-- ***`dateFormat`*** (type: `Integer`, default: `0`): The time representation to use during fitting: 
-  * 0 = Days, 
-  * 1 = Fractional years, 
-  * 2 = Unix time in milliseconds. 
-  
+- ***`dateFormat`*** (type: `Integer`, default: `0`): The time representation to use during fitting:
+  * 0 = Days,
+  * 1 = Fractional years,
+  * 2 = Unix time in milliseconds.
+
   The start, end and break times for
 each temporal segment will be encoded this way.
 
@@ -129,7 +129,7 @@ filtering).
 
 ## [C2C GEE repository](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C)
 
-[This link](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C) creates a repository in your scripts "Reader" section where you can find a library including useful functions to manage C2C-GEE row outputs and metrics and to visualise the output of the segmentation process by generating a plot in the console.
+[This link](https://code.earthengine.google.com/?accept_repo=users/sfrancini/C2C) creates a repository in your scripts "Reader" section where you can find a library including useful functions to manage C2C-GEE raw outputs and metrics and to visualise the output of the segmentation process by generating a plot in the console.
 
 To test C2C GEE, different input time series are available as image collections
 
@@ -141,7 +141,7 @@ To test C2C GEE, different input time series are available as image collections
 
 - Landsat medoid global composites\*\* at 500 meters resolution
 
-  ```javascript 
+  ```javascript
   var cmp = ee.ImageCollection("projects/planetunifi/assets/GlobalMedoid");
   ```
 
@@ -170,8 +170,8 @@ For more information on how these composites are calculated, and on the
 BAP parameters (the third suggested composite), see Francini et al.,
 (2023)
 
-Below are examples of the different forest disturbance and recovery metrics obtained using the 'test' sciprt in the C2C-GEE
-repository. 
+Below are examples of the different forest disturbance and recovery metrics obtained using the 'test' script in the C2C-GEE
+repository.
 
 <p align="left">
   <img src=".img/disturbanceSeverity.png" alt="Disturbance Severity">
@@ -265,22 +265,22 @@ disturbanceImage = disturbanceImage.updateMask(wc.first().eq(10)).updateMask(dis
 // visualization
 Map.addLayer(
   disturbanceImage.updateMask(disturbanceImage.select("NBR_changeDate").floor().neq(2025)),
-  { bands: "NBR_magnitude", min: -700, max: -150, palette: ["black", "red", "yellow", "white"]}, 
-  "Disturbance severity", 
+  { bands: "NBR_magnitude", min: -700, max: -150, palette: ["black", "red", "yellow", "white"]},
+  "Disturbance severity",
   true
 );
 
 Map.addLayer(
   disturbanceImage.updateMask(disturbanceImage.select("NBR_changeDate").floor().neq(2025)),
-  {bands: "NBR_regrowth80", min: 1, max: 8, palette: ["green", "orange", "red"]}, 
-  "years to recovery (y2r)", 
+  {bands: "NBR_regrowth80", min: 1, max: 8, palette: ["green", "orange", "red"]},
+  "years to recovery (y2r)",
   false
 );
 
 Map.addLayer(
   disturbanceImage.updateMask(disturbanceImage.select("NBR_changeDate").floor().neq(2025)),
   {bands: "NBR_changeDate", min:1984, max:2025, palette: yearsPalette},
-  "Distudbance year", 
+  "Disturbance year",
   false
 );
 

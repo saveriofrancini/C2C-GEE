@@ -6,7 +6,7 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /**
- * This segmentation algorithm consist in a modification of the bottom up algorithm
+ * This segmentation algorithm consists of a modification of the bottom up algorithm
  * (https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.23.6570&rep=rep1&type=pdf) proposed by
  * Hermosilla et al. (2015)
  */
